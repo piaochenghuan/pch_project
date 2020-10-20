@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Form, Button, Input, Checkbox } from 'antd'
-
+import request from '@/utils/request';
+import style from './index.less'
 
 
 export default function Login() {
@@ -8,10 +9,10 @@ export default function Login() {
     const [text, setText] = useState(null)
 
     const onFinish = (values: any) => {
-
+        request('/login', { method: 'POST', body: JSON.stringify(values) })
     };
     return (
-        <div>
+        <div className={style.login}>
             <Form
                 name="basic"
                 initialValues={{}}
