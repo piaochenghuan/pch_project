@@ -1,44 +1,120 @@
 import React, { useState } from 'react'
-import { Form, Button, Input, Checkbox } from 'antd'
+import { Form, Button, Input, Tabs, message } from 'antd'
 import request from '@/utils/request';
 import style from './index.less'
 
 
-export default function Login() {
 
-    const [text, setText] = useState(null)
-
-    const onFinish = (values: any) => {
-        request('/login', { method: 'POST', body: JSON.stringify(values) })
+export default function Login(props: any) {
+    const [currentKey, setCurrentKey] = useState('1')
+    function onFinish(values: any) {
+        request({
+            url: '/login',
+            method: 'POST',
+            body: values
+        }).then(res => {
+            if (res.success) {
+                props.history.push('/home')
+            } else {
+                message.warning(res.msg)
+            }
+        })
+    };
+    function onFinish2(values: any) {
+        request({
+            url: '/signup',
+            method: 'POST',
+            body: values
+        }).then(res => {
+            if (res.success) {
+                message.success('注册成功')
+                setCurrentKey('1')
+            }
+        })
     };
     return (
         <div className={style.login}>
-            <Form
-                name="basic"
-                initialValues={{}}
-                onFinish={onFinish}
+            <Tabs activeKey={currentKey} onChange={key => setCurrentKey(key)}>
+                <Tabs.TabPane tab='登录' key="1" >
+                    <Form
+                        name="basic"
+                        initialValues={{}}
+                        onFinish={onFinish}
+                    >
+                        <Form.Item
+                            label="用户名"
+                            name="username"
+                            rules={[{ required: true, message: 'Please input your username!' }]}
+                        >
+                            <Input />
+                        </Form.Item>
 
-            >
-                <Form.Item
-                    label="Username"
-                    name="username"
-                    rules={[{ required: true, message: 'Please input your username!' }]}
-                >
-                    <Input />
-                </Form.Item>
+                        <Form.Item
+                            label="密码"
+                            name="password"
+                            rules={[{ required: true, message: 'Please input your password!' }]}
+                        >
+                            <Input.Password />
+                        </Form.Item>
 
-                <Form.Item
-                    label="Password"
-                    name="password"
-                    rules={[{ required: true, message: 'Please input your password!' }]}
-                >
-                    <Input.Password />
-                </Form.Item>
+                        <Form.Item >
+                            <Button type="primary" htmlType="submit">登录</Button>
+                        </Form.Item>
+                    </Form>
+                </Tabs.TabPane>
 
-                <Form.Item >
-                    <Button type="primary" htmlType="submit">Log in</Button>
-                </Form.Item>
-            </Form>
+                <Tabs.TabPane tab='注册' key="2" >
+                    <Form
+                        name="basic"
+                        initialValues={{}}
+                        onFinish={onFinish2}
+                    >
+                        <Form.Item
+                            label="用户名"
+                            name="username"
+                            rules={[{ required: true, message: 'Please input your username!' }]}
+                        >
+                            <Input />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="密码"
+                            name="password"
+                            rules={[{ required: true, message: 'Please input your password!' }]}
+                        >
+                            <Input.Password />
+                        </Form.Item>
+
+                        <Form.Item
+                            name="confirm"
+                            label="确认密码"
+                            dependencies={['password']}
+                            hasFeedback
+                            rules={[
+                                {
+                                    required: true,
+                                    message: 'Please confirm your password!',
+                                },
+                                ({ getFieldValue }) => ({
+                                    validator(rule, value) {
+                                        if (!value || getFieldValue('password') === value) {
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject('密码不一致');
+                                    },
+                                }),
+                            ]}
+                        >
+                            <Input.Password />
+                        </Form.Item>
+
+                        <Form.Item >
+                            <Button type="primary" htmlType="submit">注册</Button>
+                        </Form.Item>
+                    </Form>
+                </Tabs.TabPane>
+            </Tabs>
+
         </div >
     )
 }

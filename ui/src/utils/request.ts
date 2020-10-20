@@ -1,18 +1,23 @@
 
 interface Options {
-    method: string,
+    url: string
+    body?: any
     [others: string]: any
 }
 const host = 'http://127.0.0.1:3000'
 
-export default (url: string = '/', options: Options) => {
+export default (options: Options) => {
     const obj = {
         method: 'POST',
         headers: {
             'content-type': 'application/json'
-        }
+        },
+        ...options
     }
-    return fetch(host + url, { ...obj, ...options })
+    if (obj.body) {
+        obj.body = JSON.stringify(obj.body)
+    }
+    return fetch(host + obj.url, obj)
         .then(res => res.json())
         .then(res => res)
         .catch(err => { console.log(err); })
