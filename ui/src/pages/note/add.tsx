@@ -26,7 +26,7 @@ export default (props: any) => {
                 onFinish={onFinish}
             >
                 <Form.Item
-                    label="标题"
+                    label="Title"
                     name="title"
                     rules={[{ required: true, message: 'Please input your title!' }]}
                 >
@@ -34,7 +34,7 @@ export default (props: any) => {
                 </Form.Item>
 
                 <Form.Item
-                    label="内容"
+                    label="Content"
                     name="content"
                     rules={[{ required: true, message: 'Please input your content!' }]}
                 >
@@ -42,7 +42,9 @@ export default (props: any) => {
                 </Form.Item>
 
                 <Form.Item >
-                    <Button type="primary" htmlType="submit">保存</Button>
+                    <Button type="primary" htmlType="submit">Save</Button>
+                    <Button onClick={() => history.goBack()}>Cancel</Button>
+
                 </Form.Item>
             </Form>
         </div>

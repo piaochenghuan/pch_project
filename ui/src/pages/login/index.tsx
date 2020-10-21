@@ -14,6 +14,7 @@ export default function Login(props: any) {
             body: values
         }).then(res => {
             if (res.success) {
+                localStorage.setItem("username", values.username)
                 props.history.push('/home')
             } else {
                 message.warning(res.msg)
