@@ -20,7 +20,6 @@ router.get('/', function (req, res, next) {
 
 // 登录
 router.post('/login', function (req, res, next) {
-  console.log(7777, req.body);
   const { username, password } = req.body
   if (username && password) {
     const sql = 'SELECT * FROM user_table WHERE username=?'
@@ -42,11 +41,11 @@ router.post('/login', function (req, res, next) {
 
 // 注册
 router.post('/signup', function (req, res, next) {
-  console.log(666, req.body);
   const { username, password, confirm } = req.body
   if (username && password && confirm) {
-    const sql = `INSERT INTO user_table (id,username,password) VALUES (?,?,?)`
-    conn.query(sql, [username, username, password], (err, result) => {
+    const sql = `INSERT INTO user_table (user_id,username,password) VALUES (?,?,?)`
+    const id = (new Date()).valueOf().toString()
+    conn.query(sql, [id, username, password], (err, result) => {
       if (!err) {
         res.json({ success: true, msg: '注册成功' })
       } else {

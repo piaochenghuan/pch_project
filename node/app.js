@@ -4,9 +4,11 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-var noteRouter= require('./routes/note');
+var noteRouter = require('./routes/note');
 
 var app = express();
 
@@ -18,11 +20,15 @@ app.all('*', function (req, res, next) {
   // 设置服务器支持的所有跨域请求的方法
   res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
   if (req.method.toLowerCase() == 'options') {
-      res.send(200);  // 让options尝试请求快速结束
+    res.send(200);  // 让options尝试请求快速结束
   } else {
-      next();
+    next();
   }
 });
+
+
+
+
 
 
 // view engine setup
