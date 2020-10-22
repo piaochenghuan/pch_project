@@ -12,8 +12,8 @@ router.get('/', function (req, res, next) {
 router.post('/signUp', function (req, res, next) {
   const { username, password, confirm } = req.body
   if (username && password && confirm) {
-    const sql = `INSERT INTO user_table (user_id,user_name,password) VALUES (${id},${username},${password})`
     const id = (new Date()).valueOf().toString()
+    const sql = `INSERT INTO user_table (user_id,user_name,password) VALUES ('${id}','${username}','${password}')`
     db.query(sql, (err, result) => {
       if (!err) {
         res.json({ success: true, msg: '注册成功' })
@@ -21,6 +21,8 @@ router.post('/signUp', function (req, res, next) {
         res.json({ success: false, msg: err })
       }
     })
+  } else {
+    res.json({ success: false, msg: '缺参数' })
   }
 });
 
