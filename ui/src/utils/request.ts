@@ -1,32 +1,42 @@
 
+import { message } from 'antd'
 import qs from 'qs'
-
-
+import axios from 'axios'
+import { history } from 'umi'
 
 interface Options {
     url: string
-    body?: any
+    data?: any
     params?: any
     [others: string]: any
 }
 const host = 'http://127.0.0.1:3000'
 
 export default (options: Options) => {
-    const obj = {
-        method: 'POST',
+    const obj: any = {
+        method: 'get',
         headers: {
             'content-type': 'application/json'
         },
-        ...options
+        data: {},
+        params: {},
+        ...options,
+        url: host + options.url
     }
-    if (obj.body) {
-        obj.body = JSON.stringify(obj.body)
+    if (obj.data) {
+        obj.data = JSON.stringify(obj.data)
     }
-    if (obj.params) {
-        obj.url = obj.url + '?' + qs.stringify(obj.params)
+
+    const userInfo = localStorage.getItem('userInfo')
+    if (userInfo) {
+        obj.headers['Authorization'] = JSON.parse(userInfo).token
     }
-    return fetch(host + obj.url, obj)
-        .then(res => res.json())
-        .then(res => res)
-        .catch(err => { console.log(err); })
+
+    return axios.request(obj)
+        .then((res: any) => {
+            return res.data
+        })
+        .catch(err => {
+            message.error(err.message);
+        })
 }

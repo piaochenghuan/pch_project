@@ -11,10 +11,10 @@ export default function Login(props: any) {
         request({
             url: '/login',
             method: 'POST',
-            body: values
+            data: values
         }).then(res => {
             if (res.success) {
-                localStorage.setItem("username", values.username)
+                localStorage.setItem("userInfo", JSON.stringify(res.data))
                 props.history.push('/home')
             } else {
                 message.warning(res.msg)
@@ -23,7 +23,7 @@ export default function Login(props: any) {
     };
     function onFinish2(values: any) {
         request({
-            url: '/signup',
+            url: '/signUp',
             method: 'POST',
             body: values
         }).then(res => {

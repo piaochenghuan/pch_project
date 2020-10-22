@@ -5,16 +5,16 @@ import { history } from 'umi';
 import request from '@/utils/request';
 
 export default (props: any) => {
+
     function onFinish(values: any) {
+        const userId = localStorage.getItem('userId')
         request({
             url: '/note/add',
             method: 'POST',
-            body: values
+            data: { ...values }
         }).then(res => {
-            if (res.success) {
+            if (res&&res.success) {
                 props.history.push('/home')
-            } else {
-                message.warning(res.msg)
             }
         })
     };
