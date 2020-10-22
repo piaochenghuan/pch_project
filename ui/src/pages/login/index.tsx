@@ -13,11 +13,9 @@ export default function Login(props: any) {
             method: 'POST',
             data: values
         }).then(res => {
-            if (res.success) {
+            if (res && res.success) {
                 localStorage.setItem("userInfo", JSON.stringify(res.data))
                 props.history.push('/home')
-            } else {
-                message.warning(res.msg)
             }
         })
     };
@@ -25,9 +23,9 @@ export default function Login(props: any) {
         request({
             url: '/signUp',
             method: 'POST',
-            body: values
+            data: values
         }).then(res => {
-            if (res.success) {
+            if (res && res.success) {
                 message.success('注册成功')
                 setCurrentKey('1')
             }

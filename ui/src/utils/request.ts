@@ -37,6 +37,6 @@ export default (options: Options) => {
             return res.data
         })
         .catch(err => {
-            message.error(err.message);
+           console.log(err)
         })
 }
