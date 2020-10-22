@@ -3,15 +3,11 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-
-
-
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var noteRouter = require('./routes/note');
+var jwt = require('jsonwebtoken');
 
 var app = express();
 
+// 路由拦截
 app.all('*', function (req, res, next) {
   // 设置请求头为允许跨域
   res.header('Access-Control-Allow-Origin', '*');
@@ -22,14 +18,28 @@ app.all('*', function (req, res, next) {
   if (req.method.toLowerCase() == 'options') {
     res.send(200);  // 让options尝试请求快速结束
   } else {
-    next();
+    if (req.path !== '/login') {
+      const token = req.headers.authorization
+      if (!token) { // token 不存在时
+        res.status(500)
+        res.json({ success: false, msg: 'token缺失!!' })
+      } else {
+        try {
+          const tokenOK = jwt.verify(token, 'userToken')
+          if (tokenOK) {
+            req.userInfo = tokenOK
+            next()
+          }
+        } catch (err) {
+          res.json({ success: false, msg: '非法token!!' })
+        }
+      }
+
+    } else {
+      next();
+    }
   }
 });
-
-
-
-
-
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -41,10 +51,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/note', noteRouter);
+// 路由
+app.use('/', require('./routes/index'));
+app.use('/user', require('./routes/user'));
+app.use('/note', require('./routes/note'));
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
