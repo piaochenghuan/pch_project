@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Form, Button, Input, Checkbox, List, Pagination } from 'antd'
 import request from '@/utils/request';
 import style from './index.less'
+import pic from '@/assets/pic.jpg'
 
 export default (props: any) => {
     const { location: { query: { currentPage } } } = props
@@ -43,6 +44,7 @@ export default (props: any) => {
                     const title = `${item.title} 用户: ${item.username} ${item.createTime}`
                     return <List.Item>
                         <List.Item.Meta
+                            avatar={<img src={item.userAvatar ? 'http://127.0.0.1:3000' + item.userAvatar : ''} style={{ width: 100 }} />}
                             title={title}
                             description={item.desc}
                         />

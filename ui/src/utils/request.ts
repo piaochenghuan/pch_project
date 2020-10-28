@@ -31,12 +31,12 @@ export default (options: Options) => {
     if (userInfo) {
         obj.headers['Authorization'] = JSON.parse(userInfo).token
     }
-
     return axios.request(obj)
         .then((res: any) => {
             return res.data
         })
         .catch(err => {
            console.log(err)
+           message.error('')
         })
 }

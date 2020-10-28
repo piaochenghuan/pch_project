@@ -24,7 +24,7 @@ export default (props: any) => {
                 <div className={style.header}><Header /></div>
                 <div className={style.body}>{props.children}</div>
                 <div className={style.footer}><Footer /></div>
-                <ChatingBox />
+                {/* <ChatingBox /> */}
             </div>
     )
 }
