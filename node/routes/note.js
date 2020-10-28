@@ -12,7 +12,8 @@ router.get('/query', function (req, res, next) {
     const { keyword = '', page = 1, pageSize = 20 } = req.query
     const start = Number(page) * 20 - 20
     const end = start + Number(pageSize)
-    const sql = `SELECT * FROM note_table WHERE note_title LIKE '%${keyword}%' LIMIT ${start},${end};`
+    // const sql = `SELECT * FROM note_table WHERE note_title LIKE '%${keyword}%' LIMIT ${start},${end};`
+    const sql = `SELECT * FROM note_table a LEFT JOIN user_table b ON  a.user_id=b.user_id WHERE a.note_title LIKE '%${keyword}%' LIMIT ${start},${end};`
     // 总条数
     const sql2 = `SELECT COUNT(*) FROM note_table WHERE note_title LIKE '%${keyword}%';`
     db.query(sql + sql2, (err, result) => {
@@ -22,8 +23,10 @@ router.get('/query', function (req, res, next) {
                     noteId: item['note_id'],
                     title: item['note_title'],
                     content: item['note_content'],
-                    username: item['user_name'],
                     createTime: item['create_time'],
+                    userId: item['user_id'],
+                    username: item['user_name'],
+                    userAvatar: item['user_avatar'],
                 }
             });
             res.json({ success: true, data: { list, page: Number(page), pageSize: Number(pageSize), total: result[1][0]['COUNT(*)'] } })
@@ -41,10 +44,10 @@ router.get('/queryMyOwn', function (req, res, next) {
             const data = result.map(item => {
                 return {
                     noteId: item['note_id'],
-                    userId: item['user_id'],
                     title: item['note_title'],
                     content: item['note_content'],
                     createTime: item['create_time'],
+                    userId: item['user_id'],
                 }
             });
             res.json({ success: true, data })
@@ -61,7 +64,7 @@ router.post('/add', function (req, res, next) {
     if (title && content && userId) {
         const id = (new Date()).valueOf().toString()
         const time = moment().format('YYYY-MM-DD hh:mm')
-        const sql = `INSERT INTO note_table (note_id,user_id,note_title,note_content,user_name,create_time) VALUES ('${id}','${userId}','${title}','${content}','${username}','${time}')`
+        const sql = `INSERT INTO note_table (note_id,user_id,note_title,note_content,create_time) VALUES ('${id}','${userId}','${title}','${content}','${time}')`
         db.query(sql, (err, result) => {
             if (!err) {
                 res.json({ success: true, msg: '成功' })

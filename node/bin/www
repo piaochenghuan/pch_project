@@ -26,8 +26,6 @@ var io = require('socket.io')(server)
 
 io.on('connection', function (socket) { // socket相关监听都要放在这个回调里
 
-
-
   io.emit("logIn", socket.handshake.query.username + '加入聊天室');
   let currentUser = socket.handshake.query.username
   socket.on("disconnect", function () {

@@ -1,11 +1,36 @@
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
+var fs = require('fs');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+// jwt模块(token)
 var jwt = require('jsonwebtoken');
 
 var app = express();
+
+
+
+
+
+// 引入文件上传模块
+const multer = require('multer');
+// 接受上传文件模块中间件
+app.use(multer({ dest: './public/upload' }).any());
+
+
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
+
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
+
+
 
 // 路由拦截
 app.all('*', function (req, res, next) {
@@ -18,7 +43,7 @@ app.all('*', function (req, res, next) {
   if (req.method.toLowerCase() == 'options') {
     res.send(200);  // 让options尝试请求快速结束
   } else {
-    if (req.path !== '/login' && req.path !== '/signUp') {
+    if (req.path !== '/login' && req.path !== '/signUp' && req.path !== '/user/uploadAvatar') {
       const token = req.headers.authorization
       if (!token) { // token 不存在时
         res.status(500)
@@ -41,15 +66,9 @@ app.all('*', function (req, res, next) {
   }
 });
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+
+
 
 // 路由
 app.use('/', require('./routes/index'));
