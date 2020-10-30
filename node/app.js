@@ -6,15 +6,12 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 // jwt模块(token)
 var jwt = require('jsonwebtoken');
+// 引入文件上传模块
+const multer = require('multer');
 
 var app = express();
 
 
-
-
-
-// 引入文件上传模块
-const multer = require('multer');
 // 接受上传文件模块中间件
 app.use(multer({ dest: './public/upload' }).any());
 
@@ -40,10 +37,11 @@ app.all('*', function (req, res, next) {
   res.header('Access-Control-Allow-Headers', 'Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild, sessionToken');
   // 设置服务器支持的所有跨域请求的方法
   res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
-  if (req.method.toLowerCase() == 'options') {
-    res.send(200);  // 让options尝试请求快速结束
+
+  if (req.method.toLowerCase() == 'options') { // 让options尝试请求快速结束
+    res.send(200);
   } else {
-    if (req.path !== '/login' && req.path !== '/signUp' && req.path !== '/user/uploadAvatar') {
+    if (req.path !== '/user/login' && req.path !== '/user/signUp' && req.path !== '/user/uploadAvatar') {
       const token = req.headers.authorization
       if (!token) { // token 不存在时
         res.status(500)
@@ -59,15 +57,11 @@ app.all('*', function (req, res, next) {
           res.json({ success: false, msg: '非法token!!' })
         }
       }
-
     } else {
       next();
     }
   }
 });
-
-
-
 
 
 // 路由
