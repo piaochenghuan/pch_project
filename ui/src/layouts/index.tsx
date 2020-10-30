@@ -5,15 +5,14 @@ import Footer from './components/Footer'
 import ChatingBox from './components/ChatingBox'
 import { getUserInfo } from '@/utils/common'
 import { history } from 'umi';
+import { message } from 'antd'
 
 export default (props: any) => {
 
-    useEffect(() => {
-        if (props.location.pathname !== '/login' && Object.keys(getUserInfo()).length === 0) {
-            history.push('/login')
-            console.log(666666);
-        }
-    }, [props.location.pathname])
+
+    if (props.location.pathname !== '/login' && Object.keys(getUserInfo()).length === 0) {
+        history.push('/login')
+    }
 
     return (
         props.location.pathname === '/login'

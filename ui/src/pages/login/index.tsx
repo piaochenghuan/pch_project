@@ -38,9 +38,8 @@ export default function Login(props: any) {
     const [loading, setLoading] = useState(false)
     function onFinish(values: any) {
         values.password = RSAEncrypt(values.password)
-        debugger
         request({
-            url: '/login',
+            url: '/user/login',
             method: 'POST',
             data: values
         }).then(res => {
@@ -55,7 +54,7 @@ export default function Login(props: any) {
         values.password = RSAEncrypt(values.password)
         values.confirm = RSAEncrypt(values.confirm)
         request({
-            url: '/signUp',
+            url: '/user/signUp',
             method: 'POST',
             data: {
                 ...values,
@@ -161,7 +160,7 @@ export default function Login(props: any) {
                                 name="avatar"
                                 listType="picture-card"
                                 showUploadList={false}
-                                action="http://127.0.0.1:3000/user/uploadAvatar"
+                                action="http://localhost:3000/user/uploadAvatar"
                                 // beforeUpload={beforeUpload}
                                 onChange={(info) => {
                                     if (info.file.status === 'uploading') {
@@ -174,7 +173,7 @@ export default function Login(props: any) {
                                     }
                                 }}
                             >
-                                {imageUrl ? <img src={'http://127.0.0.1:3000' + imageUrl} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
+                                {imageUrl ? <img src={'http://localhost:3000' + imageUrl} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
                             </Upload>
                         </Form.Item>
 

@@ -10,13 +10,13 @@ interface Options {
     params?: any
     [others: string]: any
 }
-const host = 'http://127.0.0.1:3000'
+const host = 'http://localhost:3000'
 
 export default (options: Options) => {
     const obj: any = {
         method: 'get',
         headers: {
-            'content-type': 'application/json'
+            'content-type': 'application/json',
         },
         data: {},
         params: {},
@@ -33,10 +33,14 @@ export default (options: Options) => {
     }
     return axios.request(obj)
         .then((res: any) => {
-            return res.data
+            if (res?.data?.success) {
+                return res.data
+            } else {
+                message.error(res.data.msg)
+            }
         })
         .catch(err => {
-           console.log(err)
-           message.error('')
+            console.log(err)
+            message.error('')
         })
 }

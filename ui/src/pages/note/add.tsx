@@ -28,9 +28,16 @@ export default (props: any) => {
                 <Form.Item
                     label="Title"
                     name="title"
-                    rules={[{ required: true, message: 'Please input your title!' }]}
+                    rules={[{ required: true}]}
                 >
                     <Input />
+                </Form.Item>
+
+                <Form.Item
+                    label="Desc"
+                    name="desc"
+                >
+                    <Input.TextArea />
                 </Form.Item>
 
                 <Form.Item

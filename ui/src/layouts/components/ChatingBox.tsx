@@ -22,7 +22,7 @@ export default (props: any) => {
     // 连接socket
     function socketConnect() {
         const { username } = getUserInfo()
-        socketRef.current = io(`ws://127.0.0.1:3000?username=${username}`); // 建立链接
+        socketRef.current = io(`ws://localhost:3000?username=${username}`); // 建立链接
 
         socketRef.current.on('msg', function (data: any) { // 监听服务端的消息“msg”
             const temp = <div style={{ textAlign: username !== data.username ? 'left' : 'right' }}>{data.username + ' : ' + data.msg}</div>
