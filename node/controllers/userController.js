@@ -54,15 +54,15 @@ function login(req, res, next) {
           const token = jwt.sign(data, 'userToken', { expiresIn: '1d' })
           data.token = token
 
-          // 保存到数据库
-          const sql = `UPDATE user_table SET user_token='${token}' WHERE user_id='${result[0].user_id}'`
-          db.sqlConnect(sql, [], (err, result) => {
-            if (!err) {
-              console.log('token保存成功');
-            } else {
-              console.log('token保存失败', err);
-            }
-          })
+          // // 保存到数据库
+          // const sql = `UPDATE user_table SET user_token='${token}' WHERE user_id='${result[0].user_id}'`
+          // db.sqlConnect(sql, [], (err, result) => {
+          //   if (!err) {
+          //     console.log('token保存成功');
+          //   } else {
+          //     console.log('token保存失败', err);
+          //   }
+          // })
           res.json({ success: true, msg: '登录成功', data })
         } else {
           res.json({ success: false, msg: '账号密码错误' })

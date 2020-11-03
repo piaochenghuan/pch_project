@@ -1,5 +1,7 @@
 var db = require('../utils/db_config')
 var moment = require('moment');
+const path = require('path');
+const fs = require('fs');
 
 function getObj(item) {
     return {
@@ -10,7 +12,9 @@ function getObj(item) {
         userId: item['user_id'],
         username: item['user_name'],
         userAvatar: item['user_avatar'],
-        desc: item['note_desc']
+        desc: item['note_desc'],
+        images: item['note_images'],
+        replyCount:item['reply_count']
     }
 }
 
@@ -52,11 +56,24 @@ function queryMyOwn(req, res, next) {
 
 // 新增
 function add(req, res, next) {
-    const { title, content, desc } = req.body, { userId, username } = req.userInfo
+    const { title, content, desc = '' } = req.body, { userId, username } = req.userInfo
     if (title && content && userId) {
+        let images = []
+        // 如果有图片上传
+        if (req.files && req.files.length > 0) {
+            req.files.forEach(item => {
+                // 获取文件扩展名
+                const newName = item.path + path.parse(item.originalname).ext;
+                // 文件重命名
+                fs.renameSync(item.path, newName)
+                images.push(newName.replace('public', '').replace(/\\/g, "/"))
+            })
+        }
+        images = images.join(',')
         const id = (new Date()).valueOf().toString()
         const time = moment().format('YYYY-MM-DD hh:mm')
-        const sql = `INSERT INTO note_table (note_id,user_id,note_title,note_content,create_time,note_desc) VALUES ('${id}','${userId}','${title}','${content}','${time}','${desc}')`
+        const sql = `INSERT INTO note_table (note_id,user_id,note_title,note_content,create_time,note_desc,note_images,reply_count) VALUES 
+        ('${id}','${userId}','${title}','${content}','${time}','${desc}','${images}',${0})`
         db.sqlConnect(sql, [], (err, result) => {
             if (!err) {
                 res.json({ success: true, msg: '成功' })
@@ -85,7 +102,7 @@ function del(req, res, next) {
     }
 }
 
-
+// 评论回复
 function reply(req, res, next) {
     const { content, noteId } = req.body, { userId, username } = req.userInfo
     if (noteId && content) {
@@ -95,6 +112,13 @@ function reply(req, res, next) {
         db.sqlConnect(sql, [], (err, result) => {
             if (!err) {
                 res.json({ success: true, msg: '成功' })
+                // 评论总数更新
+                const sql = `update note_table SET reply_count = reply_count + 1 WHERE note_id='${noteId}'`
+                db.sqlConnect(sql, [], (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    }
+                })
             } else {
                 res.json({ success: false, msg: err })
             }
@@ -105,12 +129,11 @@ function reply(req, res, next) {
 
 }
 
+// 查询回复列表
 function queryReplyByNoteId(req, res, next) {
     const { noteId } = req.query, { userId } = req.userInfo
     if (noteId) {
-        const sql = `SELECT * FROM reply_table WHERE note_id='${noteId}'`
-        // 总条数
-        const sql2 = `SELECT COUNT(*) FROM reply_table WHERE note_id='${noteId};`
+        const sql = `SELECT * FROM reply_table WHERE note_id='${noteId}';`
         db.sqlConnect(sql, [], (err, result) => {
             if (!err) {
                 const data = result.map(item => {
