@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Form, Button, Input, Tabs, message, Upload } from 'antd'
 import request from '@/utils/request';
-import style from './index.less'
+// import style from './index.less'
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import CryptoJS from 'crypto-js'
 import NodeRSA from 'node-rsa'

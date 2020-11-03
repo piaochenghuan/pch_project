@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { Form, Button, Input, Checkbox, List, Pagination, Space } from 'antd'
-import { MessageOutlined, LikeOutlined, StarOutlined } from '@ant-design/icons';
+import { Input, List, Space, Image } from 'antd'
+import { MessageOutlined, } from '@ant-design/icons';
 import request from '@/utils/request';
 import style from './index.less'
 import { getUserInfo } from '@/utils/common'
@@ -12,7 +12,7 @@ export default (props: any) => {
     const [list, setList] = useState([])
     const [replyList, setReplyList]: any = useState({})
     const [pagination, setPagination]: any = useState({})
-    const [noteId, setNoteId]: any = useState({})
+    const [noteIds, setNoteIds]: any = useState({})
     const [replyContent, setReplyContent]: any = useState('')
 
     useEffect(() => {
@@ -48,17 +48,15 @@ export default (props: any) => {
             }
         })
     }
-
+    // 点击回复图标
     function clickReply(item: any) {
-        if (item.noteId !== noteId[item.noteId]) {
-            setNoteId[item.noteId] = item.noteId
+        if (item.noteId !== noteIds[item.noteId]) {
+            setNoteIds[item.noteId] = item.noteId
             fetchReplyList(item.noteId)
         } else {
-            delete setNoteId[item.noteId]
+            delete setNoteIds[item.noteId]
         }
-
-        setNoteId({ ...setNoteId })
-
+        setNoteIds({ ...setNoteIds })
     }
     // 提交评论
     function submitReply(noteId: any) {
@@ -75,6 +73,7 @@ export default (props: any) => {
                 if (res && res.success) {
                     fetchList()
                     fetchReplyList(noteId)
+                    setReplyContent('')
                 }
             })
         }
@@ -94,20 +93,33 @@ export default (props: any) => {
                             <List.Item
                                 actions={[
                                     <Space>
-                                        <MessageOutlined onClick={() => clickReply(item)} />156
-                                            </Space>
+                                        <MessageOutlined onClick={() => clickReply(item)} />{item.replyCount}
+                                    </Space>
                                 ]}
                             >
                                 <List.Item.Meta
-                                    avatar={<img src={item.userAvatar ? 'http://localhost:3000' + item.userAvatar : ''} style={{ width: 100, height: 100 }} />}
+                                    avatar={<img src={item.userAvatar ? 'http://localhost:3000' + item.userAvatar : ''} style={{ width: 50, height: 50 }} />}
                                     title={item.title}
                                     description={`user : ${item.username} ${item.createTime}`}
                                 />
-                                {item.content}
+                                <div >
+                                    {item.content}
+                                </div>
+                                <div>
+                                    {item.images && item.images.split(',').map((i: any) => {
+                                        return <Image
+                                            width={300}
+                                            src={'http://localhost:3000' + i}
+                                        />
+                                    })}
+                                </div>
+
                             </List.Item>
 
-                            {noteId[item.noteId] === item.noteId && <div style={{ padding: '0 40px' }}>
-                                <Input value={replyContent} onChange={e => setReplyContent(e.target.value)} addonBefore={username + ' : '} addonAfter={<a onClick={() => submitReply(item.noteId)}>评论</a>} />
+
+                            {/* 评论列表 */}
+                            {noteIds[item.noteId] === item.noteId && <div style={{ padding: '10px 40px' }}>
+                                <Input style={{ width: '300px', marginBottom: '10px' }} value={replyContent} onChange={e => setReplyContent(e.target.value)} addonAfter={<a onClick={() => submitReply(item.noteId)}>评论</a>} />
                                 <div>
                                     {replyList[item.noteId] && replyList[item.noteId].map((item: any) => {
                                         return <div>

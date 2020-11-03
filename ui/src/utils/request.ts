@@ -23,10 +23,16 @@ export default (options: Options) => {
         ...options,
         url: host + options.url
     }
-    if (obj.data) {
+    if (obj.data && !options.upload) {
         obj.data = JSON.stringify(obj.data)
     }
 
+    // 上传文件时 不能自定义headers里的  content-type
+    if (obj.upload) {
+        obj.headers = {}
+    }
+
+    // 携带token
     const userInfo = localStorage.getItem('userInfo')
     if (userInfo) {
         obj.headers['Authorization'] = JSON.parse(userInfo).token

@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { Form, Button, Input, Checkbox, List } from 'antd'
 import request from '@/utils/request';
-import style from './index.less'
 
 
 
 export default () => {
-    const userId = localStorage.getItem('userId')
     const [list, setList] = useState([])
 
     useEffect(() => {
@@ -14,7 +12,7 @@ export default () => {
     }, [])
 
     // 查询列表
-    function onSearch(keyword: string = '') {
+    function onSearch(keyword) {
         request({
             url: '/note/queryMyOwn',
             method: 'GET',
@@ -33,7 +31,7 @@ export default () => {
             <List
                 itemLayout="horizontal"
                 dataSource={list}
-                renderItem={(item: any) => (
+                renderItem={(item) => (
                     <List.Item actions={
                         [<a onClick={() => {
                             request({
