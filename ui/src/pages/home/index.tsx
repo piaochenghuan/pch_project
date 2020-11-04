@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { Input, List, Space, Image } from 'antd'
+import { SearchBar } from 'antd-mobile'
 import { MessageOutlined, } from '@ant-design/icons';
 import request from '@/utils/request';
-import style from './index.less'
-import { getUserInfo } from '@/utils/common'
+import { Context } from '@/layouts'
 
-const { username } = getUserInfo()
 
 export default (props: any) => {
+    const { width } = useContext(Context)
     const { location: { query: { currentPage } } } = props
     const [list, setList] = useState([])
     const [replyList, setReplyList]: any = useState({})
@@ -80,8 +80,12 @@ export default (props: any) => {
     }
     return (
         <div>
-            <Input.Search onSearch={fetchList} style={{ width: 300 }} placeholder='search by title' />
 
+            {/* <Input.Search onSearch={fetchList} style={{ width: '50%' }} placeholder='search by title' /> */}
+            <SearchBar
+                placeholder='search...'
+                onSubmit={(val) => fetchList({ keyword: val })}
+            />
             <List
                 itemLayout="vertical"
                 size="large"

@@ -1,29 +1,35 @@
-import React, { useEffect } from 'react'
-import style from './index.less'
+import React, { useEffect, createContext } from 'react'
+import styles from './index.less'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import ChatingBox from './components/ChatingBox'
 import { getUserInfo } from '@/utils/common'
-import { history } from 'umi';
-import { message } from 'antd'
+import { useViewport } from '@/utils/hooks'
+
+let userInfo = getUserInfo()
+
+export const Context = createContext({ width: window.innerWidth, userInfo: {} })
 
 export default (props: any) => {
-
-
-    if (props.location.pathname !== '/login' && Object.keys(getUserInfo()).length === 0) {
-        history.push('/login')
+    //  窗口宽度
+    const { width } = useViewport()
+    // 获取用户信息
+    if (Object.keys(userInfo).length === 0) {
+        userInfo = getUserInfo()
     }
 
     return (
-        props.location.pathname === '/login'
-            ?
-            <div>{props.children}</div>
-            :
-            <div className={style.layout}>
-                <div className={style.header}><Header /></div>
-                <div className={style.body}>{props.children}</div>
-                <div className={style.footer}><Footer /></div>
-                {/* <ChatingBox /> */}
-            </div>
+        <Context.Provider value={{ width, userInfo }}>
+            { props.location.pathname === '/login'
+                ?
+                <div>{props.children}</div>
+                :
+                <div className={styles.layout}>
+                    <div className={styles.header}><Header /></div>
+                    <div className={styles.body}>{props.children}</div>
+                    <div className={styles.footer}><Footer /></div>
+                    {/* <ChatingBox /> */}
+                </div>}
+        </Context.Provider>
     )
 }

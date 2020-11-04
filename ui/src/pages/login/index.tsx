@@ -78,7 +78,7 @@ export default function Login(props: any) {
     );
 
     return (
-        <div className={style.login}>
+        <div>
             <Tabs activeKey={currentKey} onChange={key => setCurrentKey(key)}>
                 <Tabs.TabPane tab='登录' key="1" >
                     <Form
