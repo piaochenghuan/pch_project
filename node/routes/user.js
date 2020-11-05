@@ -3,7 +3,9 @@ var router = express.Router();
 
 var user = require('../controllers/userController')
 
-
+router.get('/', function (req, res, next) {
+    next()
+})
 
 
 // 注册

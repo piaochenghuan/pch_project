@@ -14,17 +14,15 @@ function getObj(item) {
         userAvatar: item['user_avatar'],
         desc: item['note_desc'],
         images: item['note_images'],
-        replyCount:item['reply_count']
+        replyCount: item['reply_count']
     }
 }
 
 // 查询所有
 function query(req, res, next) {
-    const { keyword = '', page = 1, pageSize = 20 } = req.query
-    const start = Number(page) * 20 - 20
-    const end = start + Number(pageSize)
-    // const sql = `SELECT * FROM note_table WHERE note_title LIKE '%${keyword}%' LIMIT ${start},${end};`
-    const sql = `SELECT * FROM note_table a LEFT JOIN user_table b ON  a.user_id=b.user_id WHERE a.note_title LIKE '%${keyword}%' LIMIT ${start},${end};`
+    const { keyword = '', page = 1, pageSize = 5 } = req.query
+    const index = Number(page) * Number(pageSize) - Number(pageSize)
+    const sql = `SELECT * FROM note_table a LEFT JOIN user_table b ON  a.user_id=b.user_id WHERE a.note_title LIKE '%${keyword}%' LIMIT ${index},${Number(pageSize)};`
     // 总条数
     const sql2 = `SELECT COUNT(*) FROM note_table WHERE note_title LIKE '%${keyword}%';`
     db.sqlConnect(sql + sql2, [], (err, result) => {
@@ -115,6 +113,7 @@ function reply(req, res, next) {
                 // 评论总数更新
                 const sql = `update note_table SET reply_count = reply_count + 1 WHERE note_id='${noteId}'`
                 db.sqlConnect(sql, [], (err, result) => {
+                    
                     if (err) {
                         console.log(err)
                     }

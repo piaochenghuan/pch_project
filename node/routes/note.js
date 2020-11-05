@@ -3,6 +3,10 @@ var router = express.Router();
 var note = require('../controllers/noteController')
 
 
+router.get('/', function (req, res, next) {
+    next()
+})
+
 
 // 查询
 router.get('/query', note.query);
