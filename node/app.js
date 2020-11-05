@@ -39,8 +39,7 @@ app.all('*', function (req, res, next) {
   res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
 
   if (req.method.toLowerCase() == 'options') { // 让options尝试请求快速结束
-    res.send(200);
-    res.end()
+    res.sendStatus(200);
   } else {
     if (req.path !== '/user/login' && req.path !== '/user/signUp' && req.path !== '/user/uploadAvatar') {
       const token = req.headers.authorization
@@ -62,8 +61,8 @@ app.all('*', function (req, res, next) {
       next();
     }
   }
-});
 
+});
 
 // 路由
 app.use('/', require('./routes/index'));
