@@ -4,6 +4,7 @@ import { history, useLocation } from 'umi';
 import { Button, Drawer, List, NavBar, Icon } from 'antd-mobile'
 import { Context } from '@/layouts'
 import styles from '../index.less'
+import host from '@/utils/ENV_CONFIG'
 
 export default (props) => {
     const { width, userInfo } = useContext(Context)
@@ -27,7 +28,7 @@ export default (props) => {
 
     const menuList = (
         <List
-            renderHeader={<img src={'http://localhost:3000' + userAvatar}
+            renderHeader={<img src={host + userAvatar}
                 style={{ width: '2rem', height: '2rem' }} />}
         >
             {arr.map(item => {

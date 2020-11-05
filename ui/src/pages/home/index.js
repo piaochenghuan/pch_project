@@ -4,6 +4,7 @@ import { SearchBar, Card, WingBlank, WhiteSpace, InputItem, Button } from 'antd-
 import { MessageOutlined, } from '@ant-design/icons';
 import request from '@/utils/request';
 import { Context } from '@/layouts'
+import host from '@/utils/ENV_CONFIG'
 
 
 export default (props) => {
@@ -92,45 +93,46 @@ export default (props) => {
             <div>
                 {list.map(item => {
                     return (
-                        <Card>
-                            <Card.Header
-                                title={item.title}
-                                thumb={item.userAvatar ? 'http://localhost:3000' + item.userAvatar : ''}
-                                thumbStyle={{ width: '2rem', height: '2rem' }}
-                            />
-                            <Card.Body>
-                                <div >
-                                    {item.content}
-                                </div>
-                                <div>
-                                    {item.images && item.images.split(',').map(i => {
-                                        return <img width={150} src={'http://localhost:3000' + i} />
-                                    })}
-                                </div>
-                            </Card.Body>
-                            <Card.Footer content={<>
-                                <span onClick={() => clickReply(item)} >O</span> {item.replyCount}
-                                {noteIds[item.noteId] === item.noteId &&
+                        <>
+                            <Card>
+                                <Card.Header
+                                    title={item.title}
+                                    thumb={item.userAvatar ? host + item.userAvatar : ''}
+                                    thumbStyle={{ width: '2rem', height: '2rem' }}
+                                />
+                                <Card.Body>
                                     <div >
-                                        <div style={{ textAlign: 'center' }}>↓</div>
-                                        <InputItem
-                                            value={input}
-                                            onChange={val => setInput(val)}
-                                            placeholder='input your message...'
-                                            extra={<a onClick={() => submitReply(item.noteId)}>Send</a>}
-                                        >
+                                        {item.content}
+                                    </div>
+                                    <div>
+                                        {item.images && item.images.split(',').map(i => {
+                                            return <img width={150} src={host + i} />
+                                        })}
+                                    </div>
+                                </Card.Body>
+                                <Card.Footer content={<>
+                                    <span onClick={() => clickReply(item)} >Reply</span> {item.replyCount}
+                                    {noteIds[item.noteId] === item.noteId &&
+                                        <div >
+                                            <div style={{ textAlign: 'center' }}>↓</div>
+                                            <InputItem
+                                                value={input}
+                                                onChange={val => setInput(val)}
+                                                placeholder='input your message...'
+                                                extra={<a onClick={() => submitReply(item.noteId)}>Send</a>}
+                                            >
 
-                                        </InputItem>
-                                        <div>
-                                            {replyList[item.noteId] && replyList[item.noteId].map((item) => {
-                                                return <div>
-                                                    {item.username} : {item.content}
-                                                </div>
-                                            })}
-                                        </div>
-                                    </div>}
-                            </>} />
-                        </Card>
+                                            </InputItem>
+                                            <div>
+                                                {replyList[item.noteId] && replyList[item.noteId].map((item) => {
+                                                    return <WingBlank><div>{item.username} : {item.content}</div></WingBlank>
+                                                })}
+                                            </div>
+                                        </div>}
+                                </>} />
+                            </Card>
+                            <WhiteSpace />
+                        </>
                     )
                 })}
                 {/* 加载更多 */}

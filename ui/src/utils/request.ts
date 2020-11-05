@@ -3,6 +3,7 @@ import { message } from 'antd'
 import qs from 'qs'
 import axios from 'axios'
 import { history } from 'umi'
+import host from '@/utils/ENV_CONFIG'
 
 interface Options {
     url: string
@@ -10,7 +11,6 @@ interface Options {
     params?: any
     [others: string]: any
 }
-const host = 'http://localhost:3000'
 
 export default (options: Options) => {
     const obj: any = {
@@ -37,6 +37,7 @@ export default (options: Options) => {
     if (userInfo) {
         obj.headers['Authorization'] = JSON.parse(userInfo).token
     }
+    
     return axios.request(obj)
         .then((res: any) => {
             if (res?.data?.success) {
@@ -47,6 +48,6 @@ export default (options: Options) => {
         })
         .catch(err => {
             console.log(err)
-            message.error('')
+            message.error(String(err))
         })
 }

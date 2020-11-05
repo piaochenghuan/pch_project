@@ -4,6 +4,7 @@ import { TextareaItem, Button, ImagePicker } from 'antd-mobile'
 import { history } from 'umi';
 import request from '@/utils/request';
 import { PlusOutlined } from '@ant-design/icons';
+import { message } from 'antd';
 
 export default (props) => {
     const [fileList, setFileList] = useState([])
