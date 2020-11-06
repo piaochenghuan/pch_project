@@ -14,7 +14,7 @@ export default () => {
     // 查询列表
     function onSearch(keyword) {
         request({
-            url: '/note/queryMyOwn',
+            url: 'noteQueryMyOwn',
             method: 'GET',
             params: { keyword }
         }).then(res => {

@@ -10,11 +10,11 @@ import host from '@/utils/ENV_CONFIG'
 export default (props) => {
     const { width, userInfo: { username } } = useContext(Context)
     const [list, setList] = useState([])
-    const [replyList, setReplyList] = useState({})
+    const [replyList, setReplyList] = useState([])
+    const [show, setShow] = useState(false)
     const [page, setPage] = useState(1)
     const [pagination, setPagination] = useState({})
-    const [noteIds, setNoteIds] = useState({})
-    const [input, setInput] = useState('') // 回复内容
+    const [currentNoteId, setCurrentNoteId] = useState()
 
     useEffect(() => {
         fetchList()
@@ -24,7 +24,7 @@ export default (props) => {
     function fetchList(obj = {}, action) {
         const params = obj
         request({
-            url: '/note/query',
+            url: 'noteQuery',
             params
         }).then((res) => {
             if (res && res.success) {
@@ -41,55 +41,47 @@ export default (props) => {
     // 查询回复列表
     function fetchReplyList(noteId) {
         request({
-            url: '/note/queryReplyByNoteId',
+            url: 'noteQueryReplyByNoteId',
             params: { noteId }
         }).then((res) => {
             if (res && res.success) {
-                replyList[noteId] = res.data
-                setReplyList({ ...replyList })
+                setReplyList(res.data)
             }
         })
     }
     // 点击回复图标
-    function clickReply(item) {
-        if (item.noteId !== noteIds[item.noteId]) {
-            noteIds[item.noteId] = item.noteId
-            fetchReplyList(item.noteId)
+    function clickReply(noteId) {
+        if (noteId !== currentNoteId) {
+            fetchReplyList(noteId)
         } else {
-            delete noteIds[item.noteId]
+
         }
-        setNoteIds({ ...noteIds })
+        setShow(true)
+        setCurrentNoteId(noteId)
     }
     // 提交评论
-    function submitReply(noteId) {
-        if (input.trim()) {
-            request({
-                url: '/note/reply',
+    function submitReply(noteId, content, replyId) {
+        if (content.trim()) {
+            return request({
+                url: 'noteReply',
                 method: 'post',
                 data: {
-                    noteId: noteId,
-                    content: input
+                    noteId,
+                    content,
+                    replyId
                 }
 
             }).then((res) => {
                 if (res && res.success) {
                     fetchReplyList(noteId)
-                    setInput('')
+                    return true
                 }
             })
         }
     }
     return (
-        <div>
-
-            {/* <Input.Search onSearch={fetchList} style={{ width: '50%' }} placeholder='search by title' /> */}
-            <SearchBar
-                placeholder='search...'
-                onSubmit={(val) => fetchList({ keyword: val })}
-            />
-
-
-
+        <div style={{ position: 'relative', height: '100%' }} onClick={() => show && setShow(false)}>
+            <SearchBar placeholder='search...' onSubmit={(val) => fetchList({ keyword: val })} />
             <div>
                 {list.map(item => {
                     return (
@@ -106,43 +98,124 @@ export default (props) => {
                                     </div>
                                     <div>
                                         {item.images && item.images.split(',').map(i => {
-                                            return <img width={150} src={host + i} />
+                                            return <img style={{ width: '10rem' }} src={host + i} />
                                         })}
                                     </div>
                                 </Card.Body>
-                                <Card.Footer content={<>
-                                    <span onClick={() => clickReply(item)} >Reply</span> {item.replyCount}
-                                    {noteIds[item.noteId] === item.noteId &&
-                                        <div >
-                                            <div style={{ textAlign: 'center' }}>↓</div>
-                                            <InputItem
-                                                value={input}
-                                                onChange={val => setInput(val)}
-                                                placeholder='input your message...'
-                                                extra={<a onClick={() => submitReply(item.noteId)}>Send</a>}
-                                            >
-
-                                            </InputItem>
-                                            <div>
-                                                {replyList[item.noteId] && replyList[item.noteId].map((item) => {
-                                                    return <WingBlank><div>{item.username} : {item.content}</div></WingBlank>
-                                                })}
-                                            </div>
-                                        </div>}
-                                </>} />
+                                <Card.Footer content={
+                                    <div >
+                                        <span onClick={() => clickReply(item.noteId)}>评论 {item.replyCount}</span>
+                                    </div>
+                                } />
                             </Card>
                             <WhiteSpace />
                         </>
                     )
                 })}
                 {/* 加载更多 */}
-                {pagination.total > list.length ? <Button onClick={() => {
-                    fetchList({ page: page + 1 }, 'concat')
-                    setPage(page + 1)
-                }}>More</Button> :
-                    <Button>No more</Button>
-                }
+                <div style={{ textAlign: 'center' }} onClick={() => {
+                    if (pagination.total > list.length) {
+                        fetchList({ page: page + 1 }, 'concat')
+                        setPage(page + 1)
+                    }
+                }}>
+                    {pagination.total > list.length ? '﹀' : 'no more'}
+                </div>
             </div>
+
+            <ReplyModal show={show} replyList={replyList} noteId={currentNoteId} submitReply={submitReply} />
+
+        </div>
+    )
+}
+
+
+
+
+// 回复列表
+function ReplyModal(props) {
+    const {
+        show,
+        replyList = [],
+        noteId,
+        submitReply = () => { }
+    } = props
+
+    const [selected, setSelected] = useState()
+    const [content, setContent] = useState('') // 评论内容
+
+    // 提交评论
+    function send() {
+        let replyId
+        if (selected) {
+            replyId = selected.replyId
+        }
+        submitReply(noteId, content, replyId).then(res => {
+            if (res) {
+                setContent('')
+                setSelected(null)
+            }
+        })
+    }
+
+
+    return (
+        <div style={{
+            transform: show ? 'translateX(0)' : 'translateX(100%)',
+            position: 'absolute',
+            height: '100%',
+            width: '100%',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            top: '0',
+            zIndex: '10'
+
+        }}>
+            <div style={{
+                transform: show ? 'translateX(0)' : 'translateX(100%)',
+                transition: 'all 0.5s',
+                position: 'absolute',
+                bottom: '0',
+                backgroundColor: '#fff',
+                width: '100%',
+                height: '70%',
+                display: 'flex',
+                flexDirection: 'column'
+            }}
+                onClick={(e) => {
+                    e.stopPropagation()
+                }}
+            >
+                <div style={{ textAlign: 'center' }}><WhiteSpace />Reply<WhiteSpace /></div>
+                <div style={{ flex: '1', overflowY: 'auto' }}>
+                    {replyList.map(item => {
+                        return (
+                            <WingBlank>
+                                <div onClick={() => {
+                                    setSelected(item)
+                                }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <span><img src={host + item.userAvatar} style={{ width: '1.5rem', height: '1.5rem' }} /> {item.username}{item.toUsername && ` > ${item.toUsername}`}</span>
+                                        <span>{item.createTime}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 1rem' }}>
+                                        <span>{item.content}</span>
+                                        <span><a>回复</a></span>
+                                    </div>
+                                </div>
+                                <WhiteSpace />
+                            </WingBlank>
+                        )
+                    })}
+                </div>
+                <div style={{ borderTop: '0.1rem solid rgb(200,200,200)' }} >
+                    <InputItem
+                        value={content}
+                        placeholder={selected ? `@${selected.username}` : 'input your reply'}
+                        onChange={val => setContent(val)}
+                        extra={<a onClick={send}>Send</a>} />
+                </div>
+            </div>
+
         </div>
     )
 }

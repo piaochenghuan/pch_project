@@ -4,6 +4,7 @@ import qs from 'qs'
 import axios from 'axios'
 import { history } from 'umi'
 import host from '@/utils/ENV_CONFIG'
+import api from '@/utils/api'
 
 interface Options {
     url: string
@@ -21,7 +22,7 @@ export default (options: Options) => {
         data: {},
         params: {},
         ...options,
-        url: host + options.url
+        url: host + api[options.url]
     }
     if (obj.data && !options.upload) {
         obj.data = JSON.stringify(obj.data)
@@ -37,13 +38,18 @@ export default (options: Options) => {
     if (userInfo) {
         obj.headers['Authorization'] = JSON.parse(userInfo).token
     }
-    
+
     return axios.request(obj)
         .then((res: any) => {
             if (res?.data?.success) {
                 return res.data
             } else {
-                message.error(res.data.msg)
+                if (typeof res.data.msg === 'string') {
+                    message.error(res.data.msg)
+                } else {
+                    console.log(res.data.msg);
+                    message.error('接口错误')
+                }
             }
         })
         .catch(err => {

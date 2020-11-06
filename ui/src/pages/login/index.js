@@ -34,15 +34,18 @@ function RSAEncrypt(data) {
 
 
 export default (props) => {
-    const [currentKey, setCurrentKey] = useState('login')
+    const [index, setIndex] = useState(0)
     const [values, setValues] = useState({})
 
     // 登录
     function submit() {
+        if (Object.keys(values).length < 2) {
+            return message.warning('必填')
+        }
         const data = { ...values }
         data.password = RSAEncrypt(values.password)
         request({
-            url: '/user/login',
+            url: 'userLogin',
             method: 'POST',
             data
         }).then(res => {
@@ -55,17 +58,20 @@ export default (props) => {
 
     // 注册
     function submit2() {
+        if (Object.keys(values).length < 3) {
+            return message.warning('必填')
+        }
         const data = { ...values }
         data.password = RSAEncrypt(values.password)
         data.confirm = RSAEncrypt(values.confirm)
         request({
-            url: '/user/signUp',
+            url: 'userSignUp',
             method: 'POST',
             data
         }).then(res => {
             if (res && res.success) {
                 message.success('注册成功')
-                setCurrentKey('login')
+                setIndex(0)
             }
         })
     };
@@ -76,16 +82,19 @@ export default (props) => {
     }
 
     return (
-        <div style={{ height: '100%', backgroundColor: '#fff', paddingTop: '60%' }}>
+        <div style={{ height: '100%', backgroundColor: '#fff', paddingTop: '35vh' }}>
 
             <SegmentedControl
                 style={{ marginBottom: '0.5rem' }}
                 values={['login', 'signup']}
-                onValueChange={(key) => {
-                    setCurrentKey(key)
+                selectedIndex={index}
+                onChange={e => {
+                    setIndex(e.nativeEvent.selectedSegmentIndex)
+                    setValues({})
                 }}
+
             />
-            {currentKey === 'login' &&
+            {index === 0 &&
                 <div>
                     <InputItem
                         // value={input}
@@ -104,7 +113,7 @@ export default (props) => {
                     <Button type='primary' onClick={submit}>Login</Button>
                 </div>
             }
-            {currentKey === 'signup' &&
+            {index === 1 &&
                 <div>
                     <InputItem
                         // value={input}

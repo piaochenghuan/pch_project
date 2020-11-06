@@ -27,7 +27,7 @@ export default (props) => {
         }
 
         request({
-            url: '/note/add',
+            url: 'noteAdd',
             method: 'POST',
             upload: true,
             data

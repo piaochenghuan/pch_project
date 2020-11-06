@@ -8,7 +8,7 @@ import { useViewport } from '@/utils/hooks'
 
 export const Context = createContext({ width: window.innerWidth, userInfo: {} })
 
-export default (props: any) => {
+export default (props) => {
     //  窗口宽度
     const { width } = useViewport()
     // 用户信息
