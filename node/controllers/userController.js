@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const db = require('../utils/db_config')
+const query = require('../utils/db_config')
 const path = require('path');
 const fs = require('fs');
 const func = require('../utils/func')
@@ -19,13 +19,13 @@ function signUp(req, res, next) {
 
     const id = (new Date()).valueOf().toString()
     const sql = `INSERT INTO user_table (user_id,user_name,password,user_avatar) VALUES ('${id}','${username}','${password}','${avatarUrl}')`
-    db.sqlConnect(sql, [], (err, result) => {
-      if (!err) {
+    query(sql)
+      .then(result => {
         res.json({ success: true, msg: '注册成功' })
-      } else {
+      })
+      .catch(err => {
         res.json({ success: false, msg: err })
-      }
-    })
+      })
   } else {
     res.json({ success: false, msg: '缺参数' })
   }
@@ -36,8 +36,8 @@ function login(req, res, next) {
   const { username, password } = req.body
   if (username && password) {
     const sql = `SELECT * FROM user_table WHERE user_name='${username}'`
-    db.sqlConnect(sql, [], (err, result) => {
-      if (!err) {
+    query(sql)
+      .then(result => {
         if (result.length > 0 && result[0].password === func.md5Encrypt(func.RSADecrypt(password))) {
           // 生成token
           /*
@@ -56,7 +56,7 @@ function login(req, res, next) {
 
           // // 保存到数据库
           // const sql = `UPDATE user_table SET user_token='${token}' WHERE user_id='${result[0].user_id}'`
-          // db.sqlConnect(sql, [], (err, result) => {
+          // query(sql, [], (err, result) => {
           //   if (!err) {
           //     console.log('token保存成功');
           //   } else {
@@ -67,10 +67,10 @@ function login(req, res, next) {
         } else {
           res.json({ success: false, msg: '账号密码错误' })
         }
-      } else {
+      })
+      .catch(err => {
         res.json({ success: false, msg: err })
-      }
-    })
+      })
   } else {
     res.json({ success: false, msg: '缺参数' })
   }

@@ -1,5 +1,5 @@
 const crypto = require('crypto')
-const NodeRSA = require('node-rsa');
+const NodeRSA = require('node-rsa')
 
 // RSA解密
 /*

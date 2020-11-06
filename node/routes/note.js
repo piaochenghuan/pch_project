@@ -9,7 +9,7 @@ router.get('/', function (req, res, next) {
 
 
 // 查询
-router.get('/query', note.query);
+router.get('/query', note.queryNote);
 // 查询个人的
 router.get('/queryMyOwn', note.queryMyOwn);
 // 新增
