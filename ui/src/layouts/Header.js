@@ -3,33 +3,27 @@ import React, { useState, useContext, useEffect } from 'react'
 import { history, useLocation } from 'umi';
 import { Button, Drawer, List, NavBar, Icon } from 'antd-mobile'
 import { Context } from '@/layouts'
-import styles from '../index.less'
-import host from '@/utils/ENV_CONFIG'
 
 export default (props) => {
-    const { width, userInfo } = useContext(Context)
-    const location = useLocation()
-    const { pathname, query } = location
+    const { location: { pathname, query } } = props
+    const { width, userInfo, host } = useContext(Context)
     const { username, userAvatar } = userInfo
     const [open, setOpen] = useState(false)
     const arr = [
-        { name: 'Home', onClick: () => history.push('/home'), key: '/home' },
-        { name: 'My Notes', onClick: () => history.push('/note/mylist'), key: '/mylist' },
+        // { name: 'My Notes', onClick: () => history.push('/note/mylist'), key: '/mylist' },
     ]
 
     useEffect(() => {
         setOpen(false)
     }, [query])
 
-
-    function showSideBar(show) {
+    function showSideBar() {
         setOpen(!open)
     }
 
     const menuList = (
         <List
-            renderHeader={<img src={host + userAvatar}
-                style={{ width: '2rem', height: '2rem' }} />}
+            renderHeader={<div className='ac'><img src={host + userAvatar} style={{ width: '2rem', height: '2rem' }} /></div>}
         >
             {arr.map(item => {
                 return <List.Item platform='android' onClick={item.onClick}>{item.name}</List.Item>
@@ -44,19 +38,17 @@ export default (props) => {
         <div>
             <NavBar
                 mode='light'
-                leftContent={<Icon type='ellipsis' onClick={showSideBar} />}
+                leftContent={<Icon type='ellipsis' />}
+                onLeftClick={showSideBar}
                 rightContent={<span onClick={() => {
                     history.push('/note/add')
                 }}>Note</span>}
             >
-
                 {username}
             </NavBar>
             <Drawer
                 className="my-drawer"
-                // style={{ minHeight: document.documentElement.clientHeight }}
                 style={{ top: '3rem' }}
-                // enableDragHandle
                 sidebar={menuList}
                 sidebarStyle={{ backgroundColor: '#fff' }}
                 open={open}

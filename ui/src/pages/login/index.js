@@ -1,13 +1,13 @@
-import React, { useState } from 'react'
-import { Form, Input, Tabs, message, Upload } from 'antd'
+import React, { useState, useContext, useRef, useEffect } from 'react'
+import { message } from 'antd'
 import { SegmentedControl, InputItem, Button } from 'antd-mobile'
 import request from '@/utils/request';
 // import style from './index.less'
-import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import CryptoJS from 'crypto-js'
 import NodeRSA from 'node-rsa'
-
-
+import { createForm } from 'rc-form';
+import { Context } from '@/layouts'
+import FormItems from '@/components/FormItems'
 
 function RSAEncrypt(data) {
     const key = new NodeRSA(`-----BEGIN RSA PUBLIC KEY-----
@@ -20,7 +20,7 @@ function RSAEncrypt(data) {
 
 //aes加密方法
 // function encrypt(data: string) {
-//     const key = CryptoJS.enc.Utf8.parse("1111111111111111");  //十六位十六进制数作为密钥
+//     const key = CryptoJS.enc.Utf8.parse("1111111111111111"); //十六位十六进制数作为密钥
 //     const iv = CryptoJS.enc.Utf8.parse('2222222222222222');   //十六位十六进制数作为密钥偏移量
 
 //     let srcs = CryptoJS.enc.Utf8.parse(data);
@@ -34,111 +34,102 @@ function RSAEncrypt(data) {
 
 
 export default (props) => {
+    const { width, userInfo, setLocalStorage, host } = useContext(Context)
+    const formRef = useRef()
     const [index, setIndex] = useState(0)
-    const [values, setValues] = useState({})
+
+    useEffect(() => {
+        formRef.current.resetFields()
+    }, [index])
+
 
     // 登录
     function submit() {
-        if (Object.keys(values).length < 2) {
-            return message.warning('必填')
-        }
-        const data = { ...values }
-        data.password = RSAEncrypt(values.password)
-        request({
-            url: 'userLogin',
-            method: 'POST',
-            data
-        }).then(res => {
-            if (res && res.success) {
-                localStorage.setItem("userInfo", JSON.stringify(res.data))
-                props.history.push('/home')
+        formRef.current.validateFields((err, values) => {
+            if (!err) {
+                const data = { ...values }
+                data.password = RSAEncrypt(data.password)
+                request({
+                    url: 'userLogin',
+                    method: 'POST',
+                    data
+                }).then(res => {
+                    if (res && res.success) {
+                        setLocalStorage("userInfo", res.data)
+                        props.history.push('/home')
+                    }
+                })
+            } else {
+                message.warning('必填')
             }
         })
     };
 
     // 注册
     function submit2() {
-        if (Object.keys(values).length < 3) {
-            return message.warning('必填')
-        }
-        const data = { ...values }
-        data.password = RSAEncrypt(values.password)
-        data.confirm = RSAEncrypt(values.confirm)
-        request({
-            url: 'userSignUp',
-            method: 'POST',
-            data
-        }).then(res => {
-            if (res && res.success) {
-                message.success('注册成功')
-                setIndex(0)
+        formRef.current.validateFields((err, values) => {
+            if (!err) {
+                if (values.password !== values.confirm) {
+                    return message.warning('not same')
+                }
+                const data = { ...values }
+                data.password = RSAEncrypt(data.password)
+                data.confirm = RSAEncrypt(data.confirm)
+                request({
+                    url: 'userSignUp',
+                    method: 'POST',
+                    data
+                }).then(res => {
+                    if (res && res.success) {
+                        message.success('success')
+                        setIndex(0)
+                    }
+                })
+            } else {
+                message.warning('必填')
             }
         })
     };
-    // 输入变化时
-    function handleChange(val, field) {
-        values[field] = val
-        setValues({ ...values })
-    }
+
+    const items = [
+        {
+            label: 'Username: ',
+            name: 'username',
+            fieldProps: {
+                rules: [{ required: true }]
+            }
+        },
+        {
+            type: 'password',
+            label: 'Password: ',
+            name: 'password',
+            fieldProps: {
+                rules: [{ required: true }]
+            }
+        },
+        index === 1 ? {
+            type: 'password',
+            label: 'Confirm: ',
+            name: 'confirm',
+            fieldProps: {
+                rules: [{ required: true }]
+            }
+        } : null
+    ]
 
     return (
-        <div style={{ height: '100%', backgroundColor: '#fff', paddingTop: '35vh' }}>
-
+        <div style={{ position: 'absolute', top: '50%', width: '100%', transform: 'translate(0,-50%)' }}>
             <SegmentedControl
                 style={{ marginBottom: '0.5rem' }}
                 values={['login', 'signup']}
                 selectedIndex={index}
-                onChange={e => {
-                    setIndex(e.nativeEvent.selectedSegmentIndex)
-                    setValues({})
-                }}
-
+                onChange={e => setIndex(e.nativeEvent.selectedSegmentIndex)}
             />
-            {index === 0 &&
-                <div>
-                    <InputItem
-                        // value={input}
-                        onChange={val => handleChange(val, 'username')}
-                        placeholder='...'
-                    >
-                        Username
-                    </InputItem>
-                    <InputItem
-                        type='password'
-                        onChange={val => handleChange(val, 'password')}
-                        placeholder='...'
-                    >
-                        Password
-                    </InputItem>
-                    <Button type='primary' onClick={submit}>Login</Button>
-                </div>
-            }
-            {index === 1 &&
-                <div>
-                    <InputItem
-                        // value={input}
-                        onChange={val => handleChange(val, 'username')}
-                        placeholder='...'
-                    >
-                        Username
-                    </InputItem>
-                    <InputItem
-                        type='password'
-                        onChange={val => handleChange(val, 'password')}
-                        placeholder='...'
-                    >
-                        Password
-                    </InputItem>
-                    <InputItem
-                        type='confirm'
-                        onChange={val => handleChange(val, 'confirm')}
-                        placeholder='...'
-                    >
-                        Confirm
-                    </InputItem>
-                    <Button type='primary' onClick={submit2}>Sign up</Button>
-                </div>
-            }
+            <FormItems
+                init={form => formRef.current = form}
+                items={items.filter(Boolean)}
+            />
+            < Button type='primary' onClick={index === 0 ? submit : submit2} > {index === 0 ? 'Login' : 'Signup'} </Button>
         </div >
     )
 }

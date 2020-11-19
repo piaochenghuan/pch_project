@@ -4,17 +4,15 @@ import { SearchBar, Card, WingBlank, WhiteSpace, InputItem, Button } from 'antd-
 import { MessageOutlined, } from '@ant-design/icons';
 import request from '@/utils/request';
 import { Context } from '@/layouts'
-import host from '@/utils/ENV_CONFIG'
-
 
 export default (props) => {
-    const { width, userInfo: { username } } = useContext(Context)
+    const { width, userInfo, host } = useContext(Context)
     const [list, setList] = useState([])
     const [replyList, setReplyList] = useState([])
     const [show, setShow] = useState(false)
     const [page, setPage] = useState(1)
     const [pagination, setPagination] = useState({})
-    const [currentNoteId, setCurrentNoteId] = useState()
+    const [currentNoteId, setCurrentNoteId] = useState('')
 
     useEffect(() => {
         fetchList()
@@ -83,7 +81,7 @@ export default (props) => {
         <div style={{ position: 'relative', height: '100%' }} onClick={() => show && setShow(false)}>
             <SearchBar placeholder='search...' onSubmit={(val) => fetchList({ keyword: val })} />
             <div>
-                {list.map(item => {
+                {list.map((item) => {
                     return (
                         <>
                             <Card>
@@ -97,7 +95,7 @@ export default (props) => {
                                         {item.content}
                                     </div>
                                     <div>
-                                        {item.images && item.images.split(',').map(i => {
+                                        {item.images && item.images.split(',').map((i) => {
                                             return <img style={{ width: '10rem' }} src={host + i} />
                                         })}
                                     </div>
@@ -113,7 +111,7 @@ export default (props) => {
                     )
                 })}
                 {/* 加载更多 */}
-                <div style={{ textAlign: 'center' }} onClick={() => {
+                <div className='ac' onClick={() => {
                     if (pagination.total > list.length) {
                         fetchList({ page: page + 1 }, 'concat')
                         setPage(page + 1)
@@ -140,9 +138,15 @@ function ReplyModal(props) {
         noteId,
         submitReply = () => { }
     } = props
-
+    const { width, userInfo, host } = useContext(Context)
     const [selected, setSelected] = useState()
     const [content, setContent] = useState('') // 评论内容
+
+    // 每次点击不同评论时初始化数据
+    useEffect(() => {
+        setSelected(null)
+        setContent('')
+    }, [noteId])
 
     // 提交评论
     function send() {
@@ -150,7 +154,7 @@ function ReplyModal(props) {
         if (selected) {
             replyId = selected.replyId
         }
-        submitReply(noteId, content, replyId).then(res => {
+        submitReply(noteId, content, replyId).then((res) => {
             if (res) {
                 setContent('')
                 setSelected(null)
@@ -158,21 +162,21 @@ function ReplyModal(props) {
         })
     }
 
-
     return (
         <div style={{
             transform: show ? 'translateX(0)' : 'translateX(100%)',
+            transition: 'all 0.2s',
             position: 'absolute',
             height: '100%',
             width: '100%',
             backgroundColor: 'rgba(0,0,0,0.5)',
             top: '0',
-            zIndex: '10'
+            zIndex: 10
 
         }}>
             <div style={{
                 transform: show ? 'translateX(0)' : 'translateX(100%)',
-                transition: 'all 0.5s',
+                transition: 'all 0.2s',
                 position: 'absolute',
                 bottom: '0',
                 backgroundColor: '#fff',
@@ -185,21 +189,18 @@ function ReplyModal(props) {
                     e.stopPropagation()
                 }}
             >
-                <div style={{ textAlign: 'center' }}><WhiteSpace />Reply<WhiteSpace /></div>
+                <div className='ac'><WhiteSpace />Reply<WhiteSpace /></div>
                 <div style={{ flex: '1', overflowY: 'auto' }}>
-                    {replyList.map(item => {
+                    {replyList.map((item) => {
                         return (
                             <WingBlank>
-                                <div onClick={() => {
-                                    setSelected(item)
-                                }}>
+                                <div onClick={() => setSelected(item)}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                         <span><img src={host + item.userAvatar} style={{ width: '1.5rem', height: '1.5rem' }} /> {item.username}{item.toUsername && ` > ${item.toUsername}`}</span>
                                         <span>{item.createTime}</span>
                                     </div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 1rem' }}>
+                                    <div style={{ padding: '0.5rem 1rem' }}>
                                         <span>{item.content}</span>
-                                        <span><a>回复</a></span>
                                     </div>
                                 </div>
                                 <WhiteSpace />

@@ -4,12 +4,12 @@ import { Input, Button } from 'antd'
 import io from 'socket.io-client'
 import { getUserInfo } from '@/utils/common'
 
-export default (props: any) => {
-    const [content, setContent]: any = useState([])
-    const [inputValue, setInputValue]: any = useState('')
-    const [hideWindow, setHideWindow]: any = useState(false)
-    const socketRef: any = useRef(null)
-    const chatingWindowRef: any = useRef(null)
+export default (props) => {
+    const [content, setContent] = useState([])
+    const [inputValue, setInputValue] = useState('')
+    const [hideWindow, setHideWindow] = useState(false)
+    const socketRef = useRef(null)
+    const chatingWindowRef = useRef(null)
 
     useEffect(() => {
         socketConnect()
@@ -24,13 +24,13 @@ export default (props: any) => {
         const { username } = getUserInfo()
         socketRef.current = io(`ws://localhost:3000?username=${username}`); // 建立链接
 
-        socketRef.current.on('msg', function (data: any) { // 监听服务端的消息“msg”
+        socketRef.current.on('msg', function (data) { // 监听服务端的消息“msg”
             const temp = <div style={{ textAlign: username !== data.username ? 'left' : 'right' }}>{data.username + ' : ' + data.msg}</div>
             content.push(temp)
             setContent([...content])
         });
 
-        socketRef.current.on('logIn', function (data: any) { // 监听服务端的消息“msg”
+        socketRef.current.on('logIn', function (data) { // 监听服务端的消息“msg”
             const temp = <div style={{ textAlign: 'center' }}>{data}</div>
             content.push(temp)
             setContent([...content])
@@ -51,7 +51,7 @@ export default (props: any) => {
 
                     }}>X</span></div>
                     <div className={style.window} ref={chatingWindowRef} >
-                        {content.map((i: any) => <div>{i}</div>)}
+                        {content.map((i) => <div>{i}</div>)}
                     </div>
 
                     <Input.TextArea value={inputValue} placeholder='please enter...' onChange={(e) => {

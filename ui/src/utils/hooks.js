@@ -32,3 +32,21 @@ export function useViewport() {
 
     return { width, height }
 }
+
+
+
+// 获取/修改用户信息
+export function useUserInfo() {
+    const [userInfo, setUserInfo] = useState(localStorage.getItem('userInfo') && JSON.parse(localStorage.getItem('userInfo')) || {})
+
+    function setLocalStorage(key, value) {
+        if (key && value) {
+            localStorage.setItem(key, JSON.stringify(value))
+            if (key === 'userInfo') {
+                setUserInfo(value)
+            }
+        }
+    }
+
+    return [userInfo, setLocalStorage]
+}

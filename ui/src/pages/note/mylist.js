@@ -35,11 +35,11 @@ export default () => {
                     <List.Item actions={
                         [<a onClick={() => {
                             request({
-                                url: '/note/delete',
+                                url: 'noteDelete',
                                 method: 'POST',
                                 data: { noteId: item.noteId }
                             }).then(res => {
-                                if (res.success) {
+                                if (res && res.success) {
                                     onSearch()
                                 }
                             })

@@ -6,41 +6,33 @@ import { history } from 'umi'
 import host from '@/utils/ENV_CONFIG'
 import api from '@/utils/api'
 
-interface Options {
-    url: string
-    data?: any
-    params?: any
-    [others: string]: any
-}
 
-export default (options: Options) => {
-    const obj: any = {
+export default (options) => {
+    const config = {
         method: 'get',
         headers: {
             'content-type': 'application/json',
         },
-        data: {},
-        params: {},
         ...options,
         url: host + api[options.url]
     }
-    if (obj.data && !options.upload) {
-        obj.data = JSON.stringify(obj.data)
+    if (config.data && !options.upload) {
+        config.data = JSON.stringify(config.data)
     }
 
     // 上传文件时 不能自定义headers里的  content-type
-    if (obj.upload) {
-        obj.headers = {}
+    if (config.upload) {
+        config.headers = {}
     }
 
     // 携带token
     const userInfo = localStorage.getItem('userInfo')
     if (userInfo) {
-        obj.headers['Authorization'] = JSON.parse(userInfo).token
+        config.headers['Authorization'] = JSON.parse(userInfo).token
     }
 
-    return axios.request(obj)
-        .then((res: any) => {
+    return axios.request(config)
+        .then(res => {
             if (res?.data?.success) {
                 return res.data
             } else {
@@ -50,6 +42,7 @@ export default (options: Options) => {
                     console.log(res.data.msg);
                     message.error('接口错误')
                 }
+                return {}
             }
         })
         .catch(err => {

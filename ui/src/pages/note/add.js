@@ -10,10 +10,11 @@ export default (props) => {
     const [fileList, setFileList] = useState([])
     const [values, setValues] = useState({})
 
-
-
     function onFinish() {
-        let data = { ...values }
+        if (!values.title || !values.content) {
+            return message.warning('title/content is required')
+        }
+        let data = values
         // 如果有图片上传
         if (fileList.length > 0) {
             console.log(fileList);
@@ -23,7 +24,7 @@ export default (props) => {
             });
             data.append('title', values.title)
             data.append('content', values.content)
-            data.append('desc', values.desc || '')
+            data.append('desc', values.desc)
         }
 
         request({

@@ -7,4 +7,10 @@ export default defineConfig({
   // routes: [
   //   { path: '/', component: '@/pages/index' },
   // ],
+  chainWebpack(config, { webpack }) {
+    // config.merge({
+    //   mode: 'production'
+    // })
+    // console.log(config.toConfig());
+  }
 });

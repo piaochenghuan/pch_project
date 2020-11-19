@@ -9,6 +9,14 @@ html,body{
      box-sizing: border-box;
  }
 
+
+ .ac{
+     text-align: center;
+ }
+ .h100{
+     height:100%
+ }
+
  #root{
      height: 100%;
  }
