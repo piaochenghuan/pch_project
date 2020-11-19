@@ -54,15 +54,6 @@ function login(req, res, next) {
           const token = jwt.sign(data, 'userToken', { expiresIn: '1d' })
           data.token = token
 
-          // // 保存到数据库
-          // const sql = `UPDATE user_table SET user_token='${token}' WHERE user_id='${result[0].user_id}'`
-          // query(sql, [], (err, result) => {
-          //   if (!err) {
-          //     console.log('token保存成功');
-          //   } else {
-          //     console.log('token保存失败', err);
-          //   }
-          // })
           res.json({ success: true, msg: '登录成功', data })
         } else {
           res.json({ success: false, msg: '账号密码错误' })
@@ -78,6 +69,7 @@ function login(req, res, next) {
 
 // 上传头像
 function uploadAvatar(req, res, next) {
+  const { userId } = req.userInfo
   // 获取文件扩展名
   const newName = req.files[0].path + path.parse(req.files[0].originalname).ext;
   // 文件重命名
@@ -86,7 +78,14 @@ function uploadAvatar(req, res, next) {
 
     } else {
       const url = newName.replace('public', '').replace(/\\/g, "/")
-      res.json({ success: true, msg: '上传成功', data: { url } })
+      // res.json({ success: true, msg: '上传成功', data: { url } })
+      const sql = `update user_table set user_avatar = '${url}' where user_id = '${userId}'`
+      query(sql)
+        .then(result => {
+          res.json({ success: true, data: { userAvatar: url } })
+        }).catch(err => {
+          res.json({ success: false, msg: err })
+        })
     }
   })
 }

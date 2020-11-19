@@ -1,4 +1,3 @@
-// 1.导入mysql模块
 const mysql = require('mysql')
 
 // const db = mysql.createConnection({

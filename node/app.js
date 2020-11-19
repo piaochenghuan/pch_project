@@ -41,7 +41,7 @@ app.all('*', function (req, res, next) {
   if (req.method.toLowerCase() == 'options') { // 让options尝试请求快速结束
     res.sendStatus(200);
   } else {
-    if (req.path !== '/user/login' && req.path !== '/user/signUp' && req.path !== '/user/uploadAvatar') {
+    if (req.path !== '/user/login' && req.path !== '/user/signUp' ) {
       const token = req.headers.authorization
       if (!token) { // token 不存在时
         res.status(500)

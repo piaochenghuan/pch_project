@@ -90,9 +90,10 @@ function add(req, res, next) {
 // 删除
 function del(req, res, next) {
     const { noteId } = req.body
+
     if (noteId) {
         const sql = `DELETE FROM note_table WHERE note_id='${noteId}'`
-        query(sql + sql2)
+        query(sql)
             .then(result => {
                 res.json({ success: true, msg: '成功' })
             })
