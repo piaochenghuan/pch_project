@@ -5,9 +5,29 @@ const fs = require('fs');
 
 // 查询所有
 function queryNote(req, res, next) {
-    const { keyword = '', page = 1, pageSize = 5 } = req.query
+    const { keyword = '',userId, page = 1, pageSize = 5 } = req.query
     const index = Number(page) * Number(pageSize) - Number(pageSize)
-    const sql = `SELECT * FROM note_table a LEFT JOIN user_table b ON  a.user_id=b.user_id WHERE a.note_title LIKE '%${keyword}%' LIMIT ${index},${Number(pageSize)};`
+    const sql = `
+        select
+        n.note_id,
+        n.note_title,
+        n.note_content,
+        n.note_desc,
+        n.user_id,
+        n.create_time,
+        n.note_images,
+        n.reply_count,
+        u.user_name,
+        u.user_avatar
+        from
+        note_table as n
+        left join user_table as u on n.user_id = u.user_id
+        where
+        n.note_title like '%${keyword}%' 
+        and
+        n.user_id like '%${userId}%'
+        limit ${index},${Number(pageSize)};
+    `
     // 总条数
     const sql2 = `SELECT COUNT(*) FROM note_table WHERE note_title LIKE '%${keyword}%';`
     query(sql + sql2)
@@ -18,41 +38,23 @@ function queryNote(req, res, next) {
                     title: item['note_title'],
                     content: item['note_content'],
                     createTime: item['create_time'],
+                    desc: item['note_desc'],
+                    images: item['note_images'],
+                    replyCount: item['reply_count'],
                     userId: item['user_id'],
                     username: item['user_name'],
                     userAvatar: item['user_avatar'],
-                    desc: item['note_desc'],
-                    images: item['note_images'],
-                    replyCount: item['reply_count']
                 }
             });
-            res.json({ success: true, data: { list, page: Number(page), pageSize: Number(pageSize), total: result[1][0]['COUNT(*)'] } })
-        })
-        .catch(err => res.json({ success: false, msg: err }))
-}
-
-
-// 查询单个用户
-function queryMyOwn(req, res, next) {
-    const { keyword = '' } = req.query, { userId } = req.userInfo
-    const sql = `SELECT * FROM note_table WHERE note_title LIKE '%${keyword}%' AND user_id='${userId}'`
-    query(sql)
-        .then(result => {
-            const data = result.map(item => {
-                return {
-                    noteId: item['note_id'],
-                    title: item['note_title'],
-                    content: item['note_content'],
-                    createTime: item['create_time'],
-                    userId: item['user_id'],
-                    username: item['user_name'],
-                    userAvatar: item['user_avatar'],
-                    desc: item['note_desc'],
-                    images: item['note_images'],
-                    replyCount: item['reply_count']
+            res.json({
+                success: true,
+                data: {
+                    list,
+                    page: Number(page),
+                    pageSize: Number(pageSize),
+                    total: result[1][0]['COUNT(*)']
                 }
-            });
-            res.json({ success: true, data })
+            })
         })
         .catch(err => res.json({ success: false, msg: err }))
 }
@@ -60,7 +62,7 @@ function queryMyOwn(req, res, next) {
 
 // 新增
 function add(req, res, next) {
-    const { title, content, desc = '' } = req.body, { userId, username } = req.userInfo
+    const { title, content, desc = '' } = req.body, { userId } = req.userInfo
     if (title && content && userId) {
         let images = []
         // 如果有图片上传
@@ -90,9 +92,13 @@ function add(req, res, next) {
 // 删除
 function del(req, res, next) {
     const { noteId } = req.body
-
     if (noteId) {
-        const sql = `DELETE FROM note_table WHERE note_id='${noteId}'`
+        const sql = `
+            DELETE FROM 
+            note_table 
+            WHERE 
+            note_id='${noteId}'
+        `
         query(sql)
             .then(result => {
                 res.json({ success: true, msg: '成功' })
@@ -105,7 +111,7 @@ function del(req, res, next) {
 
 // 评论回复
 async function reply(req, res, next) {
-    const { content, noteId, replyId } = req.body, { userId, username, userAvatar } = req.userInfo
+    const { content, noteId, replyId } = req.body, { userId } = req.userInfo
     if (noteId && content) {
         const id = (new Date()).valueOf().toString()
         const time = moment().format('YYYY-MM-DD hh:mm')
@@ -120,19 +126,13 @@ async function reply(req, res, next) {
             toUsername = result[0]['username']
         }
 
-        const sql = `INSERT INTO reply_table (reply_id,note_id,user_id,username,user_avatar,reply_content,create_time,to_user_id,to_username) VALUES 
-        ('${id}','${noteId}','${userId}','${username}','${userAvatar}','${content}','${time}','${toUserId}','${toUsername}')`
-        await query(sql)
+        // 新增后更新评论总数
+        const sql = `INSERT INTO reply_table (reply_id,note_id,reply_content,create_time,user_id,to_user_id) VALUES 
+        ('${id}','${noteId}','${content}','${time}','${userId}','${toUserId}');`
+        const sql2 = `update note_table set reply_count = reply_count+1 WHERE note_id='${noteId}'`
+        query(sql + sql2)
             .then(result => res.json({ success: true, msg: '成功' }))
             .catch(err => res.json({ success: false, msg: err }))
-
-        // 新增成功后更新 回复总数
-        // 查询总条数
-        const sql2 = `SELECT COUNT(*) FROM note_table WHERE note_id = '${noteId}'`
-        const result2 = await query(sql2)
-        // 评论总数更新
-        const sql3 = `update note_table set reply_count = ${result2[0]['COUNT(*)']} WHERE note_id='${noteId}'`
-        query(sql3).catch(err => console.log(err))
     } else {
         res.json({ success: false, msg: '缺少参数' })
     }
@@ -140,20 +140,38 @@ async function reply(req, res, next) {
 
 // 查询回复列表
 function queryReplyByNoteId(req, res, next) {
-    const { noteId } = req.query, { userId } = req.userInfo
+    const { noteId } = req.query
     if (noteId) {
-        const sql = `SELECT * FROM reply_table WHERE note_id='${noteId}';`
+        const sql = `
+            select
+            r.reply_id,
+            r.note_id,
+            r.reply_content,
+            r.create_time,
+            r.to_user_id,
+            r.user_id,
+            u.user_name,
+            u.user_avatar,
+            u2.user_name as to_user_name
+            from
+            reply_table as r
+            left join user_table as u on r.user_id = u.user_id
+            left join user_table as u2 on r.to_user_id = u2.user_id
+            where 
+            r.note_id = '${noteId}'
+        `
         query(sql)
             .then(result => {
                 const data = result.map(item => {
+
                     return {
                         replyId: item['reply_id'],
                         noteId: item['note_id'],
                         content: item['reply_content'],
                         userId: item['user_id'],
-                        username: item['username'],
+                        username: item['user_name'],
                         createTime: item['create_time'],
-                        toUsername: item['to_username'],
+                        toUsername: item['to_user_name'],
                         toUserId: item['to_user_id'],
                         userAvatar: item['user_avatar'],
                     }
