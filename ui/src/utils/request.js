@@ -16,6 +16,7 @@ export default (options) => {
         ...options,
         url: host + api[options.url]
     }
+
     if (config.data && !options.upload) {
         config.data = JSON.stringify(config.data)
     }

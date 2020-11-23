@@ -1,4 +1,5 @@
 import { defineConfig } from 'umi';
+const path = require('path');
 
 export default defineConfig({
   nodeModulesTransform: {
@@ -9,7 +10,7 @@ export default defineConfig({
   // ],
   chainWebpack(config, { webpack }) {
     // config.merge({
-    //   mode: 'production'
+
     // })
     // console.log(config.toConfig());
   }

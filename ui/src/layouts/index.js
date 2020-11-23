@@ -26,9 +26,9 @@ export default (props) => {
             {/* <ChatingBox /> */}
         </>
     ) : children
-
     // 判断是否登录
-    if (!userInfo && pathname !== '/login') {
+    if (JSON.stringify(userInfo) === '{}' && pathname !== '/login') {
+
         childrenNode = null
         history.push('/login')
     }

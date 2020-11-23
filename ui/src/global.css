@@ -3,15 +3,18 @@ html,body{
 
 }
 
- div,p{
+ div,p,span{
      padding: 0;
      margin: 0;
      box-sizing: border-box;
  }
 
 
- .ac{
+ .tac{
      text-align: center;
+ }
+ .br{
+    border-radius: 1rem;
  }
  .h100{
      height:100%

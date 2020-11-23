@@ -6,4 +6,4 @@ const envs = {
     com:'http://192.168.100.18:3000',
 }
 
-export default envs['default']
+export default envs['com']

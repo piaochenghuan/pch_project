@@ -1,7 +1,7 @@
 
 import React, { useState, useContext, useEffect, useRef } from 'react'
 import { createForm } from 'rc-form'
-import { Button, Drawer, List, NavBar, Icon, InputItem, WhiteSpace, WingBlank } from 'antd-mobile'
+import { InputItem, WhiteSpace, WingBlank, TextareaItem, List } from 'antd-mobile'
 
 export default createForm()((props) => {
     const {
@@ -10,34 +10,37 @@ export default createForm()((props) => {
         init
     } = props
     const { getFieldProps, setFieldsValue, validateFields, getFieldsValue, setFieldsInitialValue } = form
-    
+
     useEffect(() => {
         init && init(form)
     }, [])
 
     function renderFormItems() {
-        return items.map(item => {
-            const { type = 'input', fieldProps = {} } = item
-
-            if (type === 'textArea') {
-                return <TextareaItem
-                    {...getFieldProps(item.name, {
+        return <List>
+            {items.map(item => {
+                const { type = 'input', fieldProps = {}, element: Element } = item
+                let node
+                if (type === 'textArea') {
+                    node = <TextareaItem
+                        {...getFieldProps(item.name, {
+                            ...fieldProps
+                        })}
+                        rows={item.rows || 3}
+                        {...item}
+                    >{item.label}</TextareaItem>
+                } else if (type === 'custom') {
+                    node = typeof Element === 'function' ? <Element {...getFieldProps(item.name, {
                         ...fieldProps
-                    })}
-                    {...item}
-                >{item.label}</TextareaItem>
-            } else if (type === 'custom') {
-
-                return <WingBlank >
-                    {item.element}
-                </WingBlank>
-            } else {
-                return <InputItem
-                    {...getFieldProps(item.name, { ...fieldProps })}
-                    {...item}
-                >{item.label}</InputItem>
-            }
-        })
+                    })} /> : Element
+                } else {
+                    node = <InputItem
+                        {...getFieldProps(item.name, { ...fieldProps })}
+                        {...item}
+                    >{item.label}</InputItem>
+                }
+                return node
+            })}
+        </List>
     }
     return (
         <div>

@@ -10,6 +10,7 @@ export default (props) => {
     const { location: { pathname } } = props
     const arr = [
         { title: 'Home', onClick: () => history.push('/home'), key: '/home', icon: <i className='iconfont icon-home'></i> },
+        { title: 'Event', onClick: () => history.push('/event'), key: '/event', icon: <i className='iconfont icon-hot'></i> },
         { title: 'My', onClick: () => history.push('/user/my'), key: '/user/my', icon: <i className='iconfont icon-user'></i> },
     ]
 

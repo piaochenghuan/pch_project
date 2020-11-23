@@ -1,7 +1,7 @@
 
 import React, { useState, useContext, useEffect, useRef } from 'react'
 import { history, useLocation } from 'umi';
-import { Button, Drawer, List, NavBar, Icon, InputItem, WhiteSpace } from 'antd-mobile'
+import { List, WhiteSpace, Tabs, Badge, SearchBar, Button } from 'antd-mobile'
 import { Context } from '@/layouts'
 import { createForm } from 'rc-form'
 import PicView from '@/components/PicView'
@@ -10,12 +10,19 @@ import { message } from 'antd'
 import request from '@/utils/request'
 
 export default function My(props) {
-    const { pathname, query: { picView } } = useLocation()
+    const { pathname, query: { showPic } } = useLocation()
     const { width, userInfo, setLocalStorage, host } = useContext(Context)
     const avatarUrl = host + userInfo.userAvatar
     const formRef = useRef()
     const inputRef = useRef()
     const [editUsername, setEditUsername] = useState(false)
+    const [index, setIndex] = useState(0)
+    const [myList, setMylist] = useState([])
+
+    useEffect(() => {
+        index === 0 && fetchMyNote()
+        index === 1 && fetchMyEvent()
+    }, [index])
 
     function clickEdit() {
         setEditUsername(true)
@@ -55,28 +62,65 @@ export default function My(props) {
         input.click();
     }
 
+
+    // 查询列表
+    function fetchMyNote(keyword) {
+        request({
+            url: 'noteQuery',
+            params: { keyword, userId: userInfo.userId }
+        }).then(res => {
+            if (res && res.success) {
+                setMylist(res.data.list)
+            }
+        })
+    }
+    // 查询列表
+    function fetchMyEvent(keyword) {
+        request({
+            url: 'eventQuery',
+            params: { keyword, userId: userInfo.userId }
+        }).then(res => {
+            if (res && res.success) {
+                setMylist(res.data.list)
+            }
+        })
+    }
+
+    function changeAction(action, data = {}, cb) {
+        request({
+            url: action,
+            method: 'post',
+            data
+        }).then(res => {
+            if (res && res.success) {
+                cb && cb()
+            }
+        })
+    }
+
+
+
+    const tabs = [
+        { title: <Badge text={'今日(20)'}>my notes</Badge>, key: 'myNote' },
+        { title: <Badge text={'今日(20)'}>my events</Badge>, key: 'myEvent' },
+        { title: <Badge text={'3'}>setting</Badge>, key: '' },
+        // { title: <Badge dot>ok</Badge>, key: '' },
+    ];
+
     const usernameExtra = editUsername ?
-        <div>
-            <a onClick={save}>save</a>&nbsp;
-            <span onClick={() => setEditUsername(false)}>cancel</span>
-        </div> :
+        <a onClick={save}>✓</a> :
         <i className='iconfont icon-editor' onClick={clickEdit}></i>
     return (
         <div >
-            <List renderHeader={'User Center'}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1rem', position: 'relative' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                    <img style={{ width: '3rem', height: '3rem' }} src={avatarUrl} onClick={() => history.push({ query: { showPic: true } })} /> &nbsp;
+                    <i className='iconfont icon-editor' onClick={popFileSelector}></i>
+                </div>
                 <FormItems
                     init={form => formRef.current = form}
                     items={[
                         {
-                            type: 'custom',
-                            name: 'userAvatar',
-                            element: <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <img style={{ width: '2rem' }} src={avatarUrl} onClick={() => history.push({ query: { picView: true } })} />
-                                <i className='iconfont icon-Rightarrow' onClick={popFileSelector}></i>
-                            </div>
-                        },
-                        {
-                            label: 'Username: ',
                             name: 'username',
                             extra: usernameExtra,
                             ref: inputRef,
@@ -84,12 +128,45 @@ export default function My(props) {
                             fieldProps: {
                                 initialValue: userInfo.username,
                                 rules: [{ required: true }]
+                            },
+                            style: { width: '3rem' },
+                            onBlur: (val) => {
+                                formRef.current.resetFields()
+                                setEditUsername(false)
                             }
                         }
                     ]}
                 />
-            </List>
-            {picView && <PicView src={avatarUrl} />}
+            </div>
+
+            <Tabs tabs={tabs}
+                initialPage={0}
+                page={index}
+                onChange={(tab, index) => setIndex(index)}
+            >
+
+
+            </Tabs>
+
+            {index === 0 && <div>
+                <SearchBar placeholder='search...' onSubmit={fetchMyNote} />
+                {myList.map(item => {
+                    return <div>
+                        {item.title}
+                        <a onClick={() => changeAction('noteDelete', { noteId: item.noteId }, () => fetchMyNote())}>删除</a>
+                    </div>
+                })}
+            </div>}
+            {index === 1 && <div>
+                <SearchBar placeholder='search...' onSubmit={fetchMyEvent} />
+                {myList.map(item => {
+                    return <div>
+                        {item.name}
+                        <a onClick={() => changeAction('eventDelete', { eventId: item.eventId }, () => fetchMyEvent())}>删除</a>
+                    </div>
+                })}
+            </div>}
+            <PicView src={avatarUrl} />
         </div>
     )
 }

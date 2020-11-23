@@ -1,18 +1,19 @@
 import React, { useEffect, useState, useContext } from 'react'
-import { Input, List, Space, Image } from 'antd'
 import { SearchBar, Card, WingBlank, WhiteSpace, InputItem, Button } from 'antd-mobile'
-import { MessageOutlined, } from '@ant-design/icons';
+import { history, useLocation } from 'umi';
 import request from '@/utils/request';
 import { Context } from '@/layouts'
+import PicView from '@/components/PicView'
 
 export default (props) => {
+    const { location: { query: { showPic, showReply } } } = props
     const { width, userInfo, host } = useContext(Context)
     const [list, setList] = useState([])
     const [replyList, setReplyList] = useState([])
-    const [show, setShow] = useState(false)
     const [page, setPage] = useState(1)
     const [pagination, setPagination] = useState({})
     const [currentNoteId, setCurrentNoteId] = useState('')
+    const [src, setSrc] = useState()
 
     useEffect(() => {
         fetchList()
@@ -20,10 +21,9 @@ export default (props) => {
 
     // 查询note列表
     function fetchList(obj = {}, action) {
-        const params = obj
         request({
             url: 'noteQuery',
-            params
+            params: obj
         }).then((res) => {
             if (res && res.success) {
 
@@ -54,7 +54,7 @@ export default (props) => {
         } else {
 
         }
-        setShow(true)
+        history.push({ query: { showReply: true } })
         setCurrentNoteId(noteId)
     }
     // 提交评论
@@ -78,31 +78,35 @@ export default (props) => {
         }
     }
     return (
-        <div style={{ position: 'relative', height: '100%' }} onClick={() => show && setShow(false)}>
+        <div style={{ height: '100%' }}>
             <SearchBar placeholder='search...' onSubmit={(val) => fetchList({ keyword: val })} />
             <div>
                 {list.map((item) => {
                     return (
                         <>
-                            <Card>
+                            <Card >
                                 <Card.Header
-                                    title={item.title}
+                                    title={item.username}
                                     thumb={item.userAvatar ? host + item.userAvatar : ''}
                                     thumbStyle={{ width: '2rem', height: '2rem' }}
                                 />
                                 <Card.Body>
+                                    <a style={{ fontSize: '1.5rem' }}>{item.title}</a>
                                     <div >
-                                        {item.content}
+                                        {item.content.split('\n').map(i => <div>{i}</div>)}
                                     </div>
                                     <div>
                                         {item.images && item.images.split(',').map((i) => {
-                                            return <img style={{ width: '10rem' }} src={host + i} />
+                                            return <img style={{ width: '10rem' }} src={host + i} onClick={() => {
+                                                history.push({ query: { showPic: true } })
+                                                setSrc(host + i)
+                                            }} />
                                         })}
                                     </div>
                                 </Card.Body>
                                 <Card.Footer content={
                                     <div >
-                                        <span onClick={() => clickReply(item.noteId)}>评论 {item.replyCount}</span>
+                                        <i className='iconfont icon-comment' onClick={() => clickReply(item.noteId)}>{item.replyCount}</i>
                                     </div>
                                 } />
                             </Card>
@@ -111,7 +115,7 @@ export default (props) => {
                     )
                 })}
                 {/* 加载更多 */}
-                <div className='ac' onClick={() => {
+                <div className='tac' onClick={() => {
                     if (pagination.total > list.length) {
                         fetchList({ page: page + 1 }, 'concat')
                         setPage(page + 1)
@@ -121,8 +125,8 @@ export default (props) => {
                 </div>
             </div>
 
-            <ReplyModal show={show} replyList={replyList} noteId={currentNoteId} submitReply={submitReply} />
-
+            {<ReplyModal replyList={replyList} noteId={currentNoteId} submitReply={submitReply} />}
+            { <PicView src={src} />}
         </div>
     )
 }
@@ -132,8 +136,8 @@ export default (props) => {
 
 // 回复列表
 function ReplyModal(props) {
+    const { query: { showReply: show } } = useLocation()
     const {
-        show,
         replyList = [],
         noteId,
         submitReply = () => { }
@@ -141,7 +145,6 @@ function ReplyModal(props) {
     const { width, userInfo, host } = useContext(Context)
     const [selected, setSelected] = useState()
     const [content, setContent] = useState('') // 评论内容
-
     // 每次点击不同评论时初始化数据
     useEffect(() => {
         setSelected(null)
@@ -164,24 +167,23 @@ function ReplyModal(props) {
 
     return (
         <div style={{
-            transform: show ? 'translateX(0)' : 'translateX(100%)',
-            transition: 'all 0.2s',
-            position: 'absolute',
-            height: '100%',
+            overflow: 'hidden',
+            transition: 'all 0.3s',
+            position: 'fixed',
+            height: show ? '100vh' : '0',
+            bottom: '0',
             width: '100%',
             backgroundColor: 'rgba(0,0,0,0.5)',
-            top: '0',
-            zIndex: 10
-
-        }}>
+            zIndex: '110',
+        }}
+            onClick={e => history.goBack()}
+        >
             <div style={{
-                transform: show ? 'translateX(0)' : 'translateX(100%)',
-                transition: 'all 0.2s',
+                height: '60vh',
+                width: '100%',
+                backgroundColor: '#fff',
                 position: 'absolute',
                 bottom: '0',
-                backgroundColor: '#fff',
-                width: '100%',
-                height: '70%',
                 display: 'flex',
                 flexDirection: 'column'
             }}
@@ -189,14 +191,14 @@ function ReplyModal(props) {
                     e.stopPropagation()
                 }}
             >
-                <div className='ac'><WhiteSpace />Reply<WhiteSpace /></div>
+                <div className='tac'><WhiteSpace />Reply<WhiteSpace /></div>
                 <div style={{ flex: '1', overflowY: 'auto' }}>
                     {replyList.map((item) => {
                         return (
                             <WingBlank>
                                 <div onClick={() => setSelected(item)}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <span><img src={host + item.userAvatar} style={{ width: '1.5rem', height: '1.5rem' }} /> {item.username}{item.toUsername && ` > ${item.toUsername}`}</span>
+                                        <span><img className='br' src={host + item.userAvatar} style={{ width: '1.5rem', height: '1.5rem' }} /> {item.username}{item.toUsername && ` > ${item.toUsername}`}</span>
                                         <span>{item.createTime}</span>
                                     </div>
                                     <div style={{ padding: '0.5rem 1rem' }}>
