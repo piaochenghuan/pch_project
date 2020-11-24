@@ -5,7 +5,7 @@ const fs = require('fs');
 
 // 查询所有
 function queryNote(req, res, next) {
-    const { keyword = '',userId, page = 1, pageSize = 5 } = req.query
+    const { keyword = '', userId = '', page = 1, pageSize = 5 } = req.query
     const index = Number(page) * Number(pageSize) - Number(pageSize)
     const sql = `
         select
@@ -186,7 +186,6 @@ function queryReplyByNoteId(req, res, next) {
 
 module.exports = {
     queryNote,
-    queryMyOwn,
     add,
     del,
     reply,
