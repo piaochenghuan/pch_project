@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
 const func = require('../utils/func')
-const uuid = require('uuid')
 const UserModel = require('../models/userModel')
 
 // 注册
@@ -10,14 +9,14 @@ async function signUp(req, res, next) {
   const { username, password, confirm } = req.body
   if (username && password && confirm) {
     // 是否存在用户
-    const user = await UserModel.select(req.body)
+    const user = await UserModel.queryUser(req.body)
     if (user) {
       return res.json({ success: false, msg: '用户已存在' })
     }
     // 加密  解密前端的aes + md5加密
     const encryptedPwd = func.md5Encrypt(func.RSADecrypt(password))
     // 插入数据库
-    UserModel.insert({ ...req.body, password: encryptedPwd })
+    UserModel.addUser({ ...req.body, password: encryptedPwd })
       .then(result => {
         res.json({ success: true, msg: '注册成功' })
       })
@@ -34,7 +33,7 @@ async function login(req, res, next) {
   const { username, password } = req.body
   if (username && password) {
     // 是否存在用户
-    const user = await UserModel.select(req.body)
+    const user = await UserModel.queryUser(req.body)
     if (!user) {
       return res.json({ success: false, msg: '用户不存在' })
     }
@@ -73,7 +72,7 @@ function uploadAvatar(req, res, next) {
   fs.rename(req.files[0].path, newName, err => {
     if (!err) {
       const dir = newName.replace('public', '').replace(/\\/g, "/")
-      UserModel.update({ field: 'userAvatar', value: dir, userId })
+      UserModel.updateUser({ field: 'userAvatar', value: dir, userId })
         .then(result => res.json({ success: true, data: { userAvatar: url } }))
         .catch(err => res.json({ success: false, msg: err }))
     }

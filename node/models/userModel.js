@@ -1,16 +1,11 @@
-const jwt = require('jsonwebtoken');
 const query = require('../utils/db')
-const path = require('path');
-const fs = require('fs');
-const func = require('../utils/func')
-const uuid = require('uuid')
 
 
 class UserModel {
     constructor() {
 
     }
-    static select(data) {
+    static queryUser(data) {
         const { username } = data
         const sql = `
         select
@@ -33,7 +28,7 @@ class UserModel {
             })
             .catch(err => err)
     }
-    static insert(data) {
+    static addUser(data) {
         const { username, password, avatarUrl = '/upload/default.png' } = data
         const id = (new Date()).valueOf().toString()
         const sql = `
@@ -47,7 +42,7 @@ class UserModel {
             .then(result => result)
             .catch(err => err)
     }
-    static update(data) {
+    static updateUser(data) {
         const map = {
             username: 'user_name',
             userAvatar: 'user_avatar',

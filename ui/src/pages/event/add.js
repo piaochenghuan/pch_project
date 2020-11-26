@@ -62,7 +62,6 @@ export default (props) => {
                             rules: [{ required: true }]
                         },
                         element: props => <Map {...props} />
-
                     },
                     {
                         type: 'custom',
@@ -150,7 +149,7 @@ function Map(props) {
     }, [])
 
     return (
-        <div style={{ position: 'relative' }}>
+        <div >
             <InputItem id="keyword" placeholder="location..." value={value} onChange={val => onChange(val)} >Location</InputItem>
             <div id="mapContainer" style={{ position: 'relative', height: '10rem', width: '100%' }}></div>
         </div>
