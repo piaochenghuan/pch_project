@@ -1,4 +1,4 @@
-var query = require('../utils/db_config')
+var query = require('../utils/db')
 var moment = require('moment');
 const path = require('path');
 const fs = require('fs');

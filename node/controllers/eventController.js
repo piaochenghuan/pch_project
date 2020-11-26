@@ -1,74 +1,23 @@
-var query = require('../utils/db_config')
+var query = require('../utils/db')
 var moment = require('moment');
-const path = require('path');
-const fs = require('fs');
+const EventModel = require('../models/eventModel');
 
 
 function queryEvent(req, res, next) {
-
-    const { keyword = '', userId = '', page = 1, pageSize = 5 } = req.query
-    const index = Number(page) * Number(pageSize) - Number(pageSize)
-    const sql = `
-        SELECT
-        e.event_id,
-        e.event_name,
-        e.event_location,
-        e.event_content,
-        e.event_Initiator,
-        e.event_time,
-        e.event_participants,
-        e.event_images,
-        e.event_call_others,
-        e.event_create_time,
-        u.user_name,
-        u.user_avatar
-        FROM
-        event_table AS e
-        left join user_table as u on e.event_Initiator = u.user_id
-        where
-        e.event_name like '%${keyword}%'  
-        and
-        e.event_Initiator like '%${userId}%'
-        limit ${index},${Number(pageSize)};
-    `
-    // 总条数
-    const sql2 = `
-        SELECT 
-        COUNT(*) 
-        FROM 
-        event_table 
-        WHERE 
-        event_name LIKE '%${keyword}%';
-    `
-    query(sql + sql2)
+    EventModel.select(req.query)
         .then(result => {
-            const list = result[0].map(item => {
-                return {
-                    eventId: item['event_id'],
-                    name: item['event_name'],
-                    location: item['event_location'],
-                    content: item['event_content'],
-                    eventTime: item['event_time'],
-                    createTime: item['event_create_time'],
-                    images: item['event_images'],
-                    initiatorId: item['event_Initiator'],
-                    initiatorName: item['user_name'],
-                    initiatorAvatar: item['user_avatar'],
-                }
-            });
+            const { list, page, pageSize, total } = result
             res.json({
                 success: true,
                 data: {
                     list,
-                    page: Number(page),
-                    pageSize: Number(pageSize),
-                    total: result[1][0]['COUNT(*)']
+                    page,
+                    pageSize,
+                    total
                 }
             })
         })
         .catch(err => res.json({ success: false, msg: err }))
-
-
 }
 
 function add(req, res, next) {
