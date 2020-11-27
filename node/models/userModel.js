@@ -53,6 +53,33 @@ class UserModel {
             .then(result => result)
             .catch(err => err)
     }
+
+    static queryAllByUsername(data) {
+        const { keyword = '' } = data
+        const sql = `
+        select
+        *
+        from
+        user_table 
+        where
+        user_name like '%${keyword}%' 
+     `
+        return query(sql)
+            .then(result => {
+                return result.map(item=>{
+                    return {
+                        userId: item['user_id'],
+                        username: item['user_name'],
+                        password: item['user_password'],
+                        userAvatar: item['user_avatar'],
+                    }
+                })
+                    
+                
+            })
+            .catch(err => err)
+
+    }
 }
 
 module.exports = UserModel

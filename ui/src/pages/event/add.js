@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react'
-import { TextareaItem, Button, ImagePicker, DatePicker, List, InputItem } from 'antd-mobile'
+import { Button, ImagePicker, DatePicker, List, InputItem, Modal, SearchBar } from 'antd-mobile'
 import { history } from 'umi';
 import request from '@/utils/request';
 import { message } from 'antd';
@@ -9,6 +9,7 @@ import moment from 'moment'
 
 export default (props) => {
     const formRef = useRef()
+    const [visible, setVisible] = useState(false)
 
     function save() {
         formRef.current.validateFields((err, values) => {
@@ -90,7 +91,10 @@ export default (props) => {
                         name: 'callOthers',
                         placeholder: "@ your friends...",
                         editable: false,
-                        extra: <a>call</a>
+                        extra: <>
+                            <a onClick={() => setVisible(true)}>call</a>
+                            <SelectUser visible={visible} onClose={() => setVisible(false)} />
+                        </>
                     },
                     {
                         type: 'custom',
@@ -155,3 +159,51 @@ function Map(props) {
         </div>
     )
 }
+
+
+function SelectUser(props) {
+    const {
+        visible = false,
+        onClose = () => { },
+        onChange = () => { }
+    } = props
+
+    const [list, setList] = useState([])
+
+    useEffect(() => {
+        fetchList()
+    }, [])
+
+    function fetchList(keyword = '') {
+        request({
+            url: 'queryAllByUsername',
+            params: { keyword }
+        }).then(res => {
+            if (res && res.success) {
+                setList(res.data)
+            }
+        })
+    }
+
+
+    return (
+        <Modal
+            visible={visible}
+            transparent
+            onClose={onClose}
+            title="Select User"
+            footer={[{ text: 'Ok', onPress: onChange }]}
+            afterClose={() => { }}
+        >
+            <SearchBar placeholder='search...' onSubmit={fetchList} />
+            <div>
+                {list.map(item => {
+                    return <div>{item.username}</div>
+                })}
+            </div>
+        </Modal>
+    )
+}
+
+
+

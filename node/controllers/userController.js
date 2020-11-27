@@ -79,8 +79,16 @@ function uploadAvatar(req, res, next) {
   })
 }
 
+
+function queryAllByUsername(req, res, next) {
+  UserModel.queryAllByUsername(req.query)
+    .then(result => res.json({ success: true, data: result }))
+    .catch(err => res.json({ success: false, msg: err }))
+}
+
 module.exports = {
   login,
   signUp,
-  uploadAvatar
+  uploadAvatar,
+  queryAllByUsername
 }
