@@ -24,18 +24,32 @@ var server = http.createServer(app);
 
 var io = require('socket.io')(server)
 
+
+// 连接到 socket的用户 
+const users = {}
+
 io.on('connection', function (socket) { // socket相关监听都要放在这个回调里
+  const {
+    userId,
+    username,
+  } = socket.handshake.query
+  users[username] = socket.id
 
-  io.emit("logIn", socket.handshake.query.username + '加入聊天室');
-  let currentUser = socket.handshake.query.username
+  socket.on('sayTo', data => {
+    const { toUsername, content } = data
+    if (toUsername && content) {
+      socket.to(users[toUsername]).emit('remind', 'fuckyou')
+    }
+  })
+
   socket.on("disconnect", function () {
-    console.log("a user go out");
+    console.log(username, "断开连接");
   });
 
-  socket.on("msg", function (msg) {
-    io.emit('msg', { username: currentUser, msg })
-  });
-});
+})
+
+
+
 
 
 
@@ -105,4 +119,11 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
+}
+
+
+
+module.exports = {
+  users,
+  io
 }
