@@ -3,7 +3,7 @@ export default {
     'userLogin': '/user/login', //登录
     'userSignUp': '/user/signUp',//注册
     'uploadAvatar': '/user/uploadAvatar', //上传头像
-    'queryAllByUsername': '/user/queryAllByUsername', // 用户名查询
+    'queryUser': '/user/queryUser', // 用户名查询
 
     // note
     'noteQuery': '/note/query',// 查询note列表

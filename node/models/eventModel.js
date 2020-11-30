@@ -73,9 +73,9 @@ module.exports = class EventModel {
         const sql = `
             INSERT INTO 
             event_table 
-            (event_id,event_initiator,event_name,event_location,event_content,event_time,event_create_time,event_images) 
+            (event_id,event_initiator,event_name,event_location,event_content,event_time,event_create_time,event_images,event_call_others) 
             VALUES 
-            ('${id}','${userId}','${name}','${location}','${content}','${eventTime}','${time}','${images}')
+            ('${id}','${userId}','${name}','${location}','${content}','${eventTime}','${time}','${images}','${callOthers}')
         `
         return query(sql)
             .then(result => result)

@@ -1,7 +1,5 @@
-var query = require('../utils/db')
-var moment = require('moment');
-const path = require('path');
-const fs = require('fs');
+const query = require('../utils/db')
+const moment = require('moment');
 
 module.exports = class NoteModel {
     constructor() {

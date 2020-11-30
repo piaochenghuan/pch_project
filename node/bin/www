@@ -33,12 +33,14 @@ io.on('connection', function (socket) { // socket相关监听都要放在这个�
     userId,
     username,
   } = socket.handshake.query
-  users[username] = socket.id
+  users[userId] = socket.id
 
-  socket.on('sayTo', data => {
-    const { toUsername, content } = data
-    if (toUsername && content) {
-      socket.to(users[toUsername]).emit('remind', 'fuckyou')
+  socket.on('remindTo', data => {
+    const { content, toUserIds } = data
+    if (toUserIds) {
+      toUserIds.forEach(i => {
+        socket.to(users[i]).emit('remind', 'fuckyou')
+      })
     }
   })
 

@@ -9,7 +9,8 @@ async function signUp(req, res, next) {
   const { username, password, confirm } = req.body
   if (username && password && confirm) {
     // 是否存在用户
-    const user = await UserModel.queryUser(req.body)
+    const result = await UserModel.queryUser({ keyword: username })
+    const user = result[0]
     if (user) {
       return res.json({ success: false, msg: '用户已存在' })
     }
@@ -33,11 +34,12 @@ async function login(req, res, next) {
   const { username, password } = req.body
   if (username && password) {
     // 是否存在用户
-    const user = await UserModel.queryUser(req.body)
+    const result = await UserModel.queryUser({ keyword: username })
+    const user = result[0]
     if (!user) {
       return res.json({ success: false, msg: '用户不存在' })
     }
-
+    
     // 验证密码
     if (user.password === func.md5Encrypt(func.RSADecrypt(password))) {
       /*
@@ -80,8 +82,8 @@ function uploadAvatar(req, res, next) {
 }
 
 
-function queryAllByUsername(req, res, next) {
-  UserModel.queryAllByUsername(req.query)
+function queryUser(req, res, next) {
+  UserModel.queryUser(req.query)
     .then(result => res.json({ success: true, data: result }))
     .catch(err => res.json({ success: false, msg: err }))
 }
@@ -90,5 +92,5 @@ module.exports = {
   login,
   signUp,
   uploadAvatar,
-  queryAllByUsername
+  queryUser
 }

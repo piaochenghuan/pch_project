@@ -1,15 +1,24 @@
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useContext } from 'react'
 import { Button, ImagePicker, DatePicker, List, InputItem, Modal, SearchBar } from 'antd-mobile'
 import { history } from 'umi';
 import request from '@/utils/request';
 import { message } from 'antd';
 import FormItems from '@/components/FormItems'
 import moment from 'moment'
+import lodash from 'lodash'
+import { Context } from '@/layouts'
 
 export default (props) => {
+    const { userInfo, host, socket } = useContext(Context)
     const formRef = useRef()
-    const [visible, setVisible] = useState(false)
+
+    useEffect(() => {
+
+        socket.open()
+
+        return () => socket.close()
+    }, [])
 
     function save() {
         formRef.current.validateFields((err, values) => {
@@ -27,7 +36,13 @@ export default (props) => {
                     data.append('desc', values.desc)
                 }
                 data.eventTime = moment(data.eventTime).format('YYYY-MM-DD HH:mm')
-
+                data.callOthers = data.callOthers?.map(i => i.userId)
+                // 如果有@其他人实时推送消息
+                if (data.callOthers) {
+                    socket.emit('remindTo', {
+                        toUserIds: data.callOthers,
+                    })
+                }
                 request({
                     url: 'eventAdd',
                     method: 'POST',
@@ -58,14 +73,6 @@ export default (props) => {
                     },
                     {
                         type: 'custom',
-                        name: 'location',
-                        fieldProps: {
-                            rules: [{ required: true }]
-                        },
-                        element: props => <Map {...props} />
-                    },
-                    {
-                        type: 'custom',
                         name: 'eventTime',
                         fieldProps: {
                             rules: [{ required: true }]
@@ -82,19 +89,52 @@ export default (props) => {
                         }
                     },
                     {
+                        type: 'custom',
+                        name: 'location',
+                        fieldProps: {
+                            rules: [{ required: true }]
+                        },
+                        element: props => <Map {...props} />
+                    },
+
+                    {
                         type: 'textArea',
                         label: 'Content: ',
                         name: 'content',
                         placeholder: "Content...",
                     },
                     {
+                        type: 'custom',
                         name: 'callOthers',
-                        placeholder: "@ your friends...",
-                        editable: false,
-                        extra: <>
-                            <a onClick={() => setVisible(true)}>call</a>
-                            <SelectUser visible={visible} onClose={() => setVisible(false)} />
-                        </>
+                        element: props => {
+                            const { value, onChange } = props
+                            const [visible, setVisible] = useState(false)
+                            const [selected, setSelected] = useState([])
+
+                            return <div style={{ position: 'relative' }}>
+                                <InputItem
+                                    editable={false}
+                                    value={value?.map(i => i.username)}
+                                    placeholder='@ your friends...'
+                                    extra={<a onClick={e => { e.stopPropagation(); setVisible(!visible) }}>@</a>}
+                                />
+                                <SelectUser
+                                    visible={visible}
+                                    onClose={() => setVisible(false)}
+                                    onChange={item => {
+                                        if (selected.find(i => i.userId === item.userId)) {
+                                            return
+                                        } else {
+                                            selected.push(item)
+                                        }
+                                        onChange([...selected])
+                                        setSelected([...selected])
+                                    }}
+                                />
+                            </div>
+                        }
+
+
                     },
                     {
                         type: 'custom',
@@ -160,12 +200,12 @@ function Map(props) {
     )
 }
 
-
+// 选择用户组件
 function SelectUser(props) {
     const {
         visible = false,
         onClose = () => { },
-        onChange = () => { }
+        onChange = () => { },
     } = props
 
     const [list, setList] = useState([])
@@ -176,7 +216,7 @@ function SelectUser(props) {
 
     function fetchList(keyword = '') {
         request({
-            url: 'queryAllByUsername',
+            url: 'queryUser',
             params: { keyword }
         }).then(res => {
             if (res && res.success) {
@@ -185,23 +225,34 @@ function SelectUser(props) {
         })
     }
 
-
+    function selectUser(item) {
+        onChange(item)
+        onClose()
+    }
     return (
-        <Modal
-            visible={visible}
-            transparent
-            onClose={onClose}
-            title="Select User"
-            footer={[{ text: 'Ok', onPress: onChange }]}
-            afterClose={() => { }}
+        <div style={{
+            display: visible ? true : 'none',
+            position: 'absolute',
+            height: '10rem',
+            width: '60%',
+            zIndex: '199',
+            top: 0,
+            right: 0,
+            transform: 'translate(0,-100%)',
+            overflow: 'scroll',
+            backgroundColor: '#fff'
+        }}
+            onClick={e => e.stopPropagation()}
         >
-            <SearchBar placeholder='search...' onSubmit={fetchList} />
+            {/* <SearchBar placeholder='search...' onSubmit={fetchList} /> */}
             <div>
-                {list.map(item => {
-                    return <div>{item.username}</div>
-                })}
+                <List >
+                    {list.map(item => {
+                        return <List.Item onClick={() => selectUser(item)} >{item.username}</List.Item>
+                    })}
+                </List>
             </div>
-        </Modal>
+        </div>
     )
 }
 

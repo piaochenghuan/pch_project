@@ -1,6 +1,7 @@
 var query = require('../utils/db')
 var moment = require('moment');
 const EventModel = require('../models/eventModel');
+const UserModel = require('../models/userModel')
 
 
 function queryEvent(req, res, next) {
@@ -21,11 +22,21 @@ function queryEvent(req, res, next) {
 }
 
 function add(req, res, next) {
-    const { name, location, eventTime } = req.body, { userId } = req.userInfo
+    const { name, location, eventTime, callOthers } = req.body, { userId } = req.userInfo
     if (name && location && eventTime) {
+
+        if (callOthers) {
+            callOthers.forEach(async (userId) => {
+                await UserModel.updateUser({ userId, field: 'userRemindCount', action: '++' })
+                console.log(111);
+            })
+        }
+
         EventModel.addEvent({ ...req.body, userId })
             .then(result => res.json({ success: true, msg: '成功' }))
             .catch(err => res.json({ success: false, msg: err }))
+
+
     } else {
         res.json({ success: false, msg: '缺少参数' })
     }

@@ -15,36 +15,33 @@ export default createForm()((props) => {
         init && init(form)
     }, [])
 
-    function renderFormItems() {
-        return <List>
-            {items.map(item => {
-                const { type = 'input', fieldProps = {}, element: Element } = item
-                let node
-                if (type === 'textArea') {
-                    node = <TextareaItem
-                        {...getFieldProps(item.name, {
-                            ...fieldProps
-                        })}
-                        rows={item.rows || 3}
-                        {...item}
-                    >{item.label}</TextareaItem>
-                } else if (type === 'custom') {
-                    node = typeof Element === 'function' ? <Element {...getFieldProps(item.name, {
-                        ...fieldProps
-                    })} /> : Element
-                } else {
-                    node = <InputItem
-                        {...getFieldProps(item.name, { ...fieldProps })}
-                        {...item}
-                    >{item.label}</InputItem>
-                }
-                return node
-            })}
-        </List>
-    }
     return (
         <div>
-            {renderFormItems()}
+            {<List>
+                {items.map(item => {
+                    const { type = 'input', fieldProps = {}, element: Element } = item
+                    let node
+                    if (type === 'textArea') {
+                        node = <TextareaItem
+                            {...getFieldProps(item.name, {
+                                ...fieldProps
+                            })}
+                            rows={item.rows || 3}
+                            {...item}
+                        >{item.label}</TextareaItem>
+                    } else if (type === 'custom') {
+                        node = typeof Element === 'function' ? <Element {...getFieldProps(item.name, {
+                            ...fieldProps
+                        })} /> : Element
+                    } else {
+                        node = <InputItem
+                            {...getFieldProps(item.name, { ...fieldProps })}
+                            {...item}
+                        >{item.label}</InputItem>
+                    }
+                    return node
+                })}
+            </List>}
         </div>
     )
 })

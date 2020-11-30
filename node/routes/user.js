@@ -15,7 +15,7 @@ router.post('/login', user.login)
 // 上传头像
 router.post('/uploadAvatar', user.uploadAvatar);
 
-// 根据用户名搜索
-router.get('/queryAllByUsername', user.queryAllByUsername);
+// 用户搜索
+router.get('/queryUser', user.queryUser);
 
 module.exports = router;
