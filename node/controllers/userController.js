@@ -75,8 +75,14 @@ function uploadAvatar(req, res, next) {
     if (!err) {
       const dir = newName.replace('public', '').replace(/\\/g, "/")
       UserModel.updateUser({ field: 'userAvatar', value: dir, userId })
-        .then(result => res.json({ success: true, data: { userAvatar: url } }))
-        .catch(err => res.json({ success: false, msg: err }))
+        .then(result => {
+
+          res.json({ success: true, data: { userAvatar: dir } })
+        })
+        .catch(err => {
+
+          res.json({ success: false, msg: err })
+        })
     }
   })
 }

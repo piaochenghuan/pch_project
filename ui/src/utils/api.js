@@ -18,4 +18,5 @@ export default {
     'eventJoin': '/event/join',// 参加/取消参加 event
     'eventQueryJoinList': '/event/queryJoinList',// 参加人员列表
     'eventDelete': '/event/delete',// 参加人员列表
+    'queryRemindedEvent': '/event/queryRemindedEvent',// 被邀请的活动列表查询
 }

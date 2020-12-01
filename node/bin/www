@@ -26,31 +26,26 @@ var io = require('socket.io')(server)
 
 
 // 连接到 socket的用户 
-const users = {}
-
+const socketUsers = {}
 io.on('connection', function (socket) { // socket相关监听都要放在这个回调里
-  const {
-    userId,
-    username,
-  } = socket.handshake.query
-  users[userId] = socket.id
+  const { userId, username } = socket.handshake.query
+  // 技术每一个连接socket的用户 
+  socketUsers[userId] = socket.id
+  // console.log(userId, '已连接');
 
   socket.on('remindTo', data => {
-    const { content, toUserIds } = data
-    if (toUserIds) {
-      toUserIds.forEach(i => {
-        socket.to(users[i]).emit('remind', 'fuckyou')
-      })
-    }
+    // socket.to(users[i]).emit('remind', 'fuckyou')
   })
 
   socket.on("disconnect", function () {
-    console.log(username, "断开连接");
+    // console.log(userId, "断开连接");
+    delete socketUsers.userId
   });
 
 })
 
-
+global.io = io
+global.socketUsers = socketUsers
 
 
 
@@ -121,11 +116,4 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
-}
-
-
-
-module.exports = {
-  users,
-  io
 }

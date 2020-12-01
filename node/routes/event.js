@@ -19,5 +19,7 @@ router.post('/join', event.join);
 router.get('/queryJoinList', event.queryJoinList);
 // 删除活动
 router.post('/delete', event.del);
+//  被邀请的活动列表查询
+router.get('/queryRemindedEvent', event.queryRemindedEvent);
 
 module.exports = router;

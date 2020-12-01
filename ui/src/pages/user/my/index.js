@@ -114,7 +114,7 @@ export default function My(props) {
         <div >
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1rem', position: 'relative' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-                    <img style={{ width: '3rem', height: '3rem' }} src={avatarUrl} onClick={() => history.push({ query: { showPic: true } })} /> &nbsp;
+                    <img className='avatar' src={avatarUrl} onClick={() => history.push({ query: { showPic: true } })} /> &nbsp;
                     <i className='iconfont icon-editor' onClick={popFileSelector}></i>
                 </div>
                 <FormItems

@@ -8,18 +8,21 @@ import moment from "moment"
 
 
 export default (props) => {
-    const { location: { query: { showPic, showReply } } } = props
+    const { location: { query: { keyword } } } = props
     const { width, userInfo, host } = useContext(Context)
     const [list, setList] = useState([])
     const [joinMap, setJoinMap] = useState({})
-    const [show, setShow] = useState(false)
     const [page, setPage] = useState(1)
     const [pagination, setPagination] = useState({})
     const [src, setSrc] = useState()
 
 
     useEffect(() => {
-        fetchList()
+        if (keyword) {
+            fetchList({ keyword })
+        } else {
+            fetchList()
+        }
     }, [])
 
     // 查询note列表

@@ -1,38 +1,57 @@
 
 import React, { useState, useContext, useEffect, useRef } from 'react'
 import { history, useLocation } from 'umi';
-import { List, WhiteSpace, Tabs, Badge, SearchBar, Button, TextareaItem } from 'antd-mobile'
+import { List, WhiteSpace, Tabs, Badge, SearchBar, Button, TextareaItem, Card } from 'antd-mobile'
 import { Context } from '@/layouts'
 import { createForm } from 'rc-form'
 import PicView from '@/components/PicView'
 import FormItems from '@/components/FormItems'
 import { message } from 'antd'
 import request from '@/utils/request'
-import io from 'socket.io-client'
+import EventRermind from './components/EventRemind'
 
 
-export default () => {
-    const { userInfo, host, socket } = useContext(Context)
-    const socketRef = useRef()
+export default (props) => {
+    const { location: { query: { action } } } = props
+    const { userInfo, host, userMsgCount } = useContext(Context)
 
-    useEffect(() => {
-
-        // socket.open()
-    }, [])
-
-    function sendMsg() {
-        // socket.emit('sayTo', {
-        //     toUsername: 'pch',
-        //     content: 'hi ,pch'
-        // })
+    function changeAction(name) {
+        history.push({
+            query: { action: name }
+        })
     }
+
+    const arr = [
+        { title: '活动邀请', count: userMsgCount.userRemindCount, onClick: () => changeAction('eventRemind') },
+        { title: '私信', count: userMsgCount.userChatCount, onClick: () => changeAction('privateMsg') },
+        { title: '活动消息', onClick: () => changeAction('eventMsg') },
+    ]
+
     return (
         <div>
-            <div style={{ backgroundColor: 'pink', height: '20rem' }}>
+            {!action &&
+                <List>
+                    {arr.map(item => {
+                        const { title, count, onClick } = item
+                        let text = null
+                        if (count) {
+                            text = count.toString()
+                        }
+                        return (
+                            <List.Item
+                                onClick={onClick}
+                                extra={<Badge text={text}>></Badge>}
+                            >
+                                {title}
+                            </List.Item>
+                        )
+                    })}
+                </List>}
 
-            </div>
-            <TextareaItem rows={5} />
-            <Button type='primary' onClick={sendMsg}>Send</Button>
+            {action === 'eventRemind' && <EventRermind />}
+
+
+
         </div>
     )
 }

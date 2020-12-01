@@ -51,7 +51,7 @@ function SideBar(props) {
 
     function renderContent() {
         return <List
-            renderHeader={<div className='tac'><img style={{ width: '3rem', height: '3rem' }} src={avatarUrl} /></div>}
+            renderHeader={<div className='tac'><img className='avatar' src={avatarUrl} /></div>}
             renderFooter={<Button type='warning' onClick={logout}>Log out</Button>}
         >
             {sideContent.map(item => {

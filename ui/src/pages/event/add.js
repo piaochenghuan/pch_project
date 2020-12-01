@@ -6,19 +6,9 @@ import request from '@/utils/request';
 import { message } from 'antd';
 import FormItems from '@/components/FormItems'
 import moment from 'moment'
-import lodash from 'lodash'
-import { Context } from '@/layouts'
 
 export default (props) => {
-    const { userInfo, host, socket } = useContext(Context)
     const formRef = useRef()
-
-    useEffect(() => {
-
-        socket.open()
-
-        return () => socket.close()
-    }, [])
 
     function save() {
         formRef.current.validateFields((err, values) => {
@@ -37,12 +27,7 @@ export default (props) => {
                 }
                 data.eventTime = moment(data.eventTime).format('YYYY-MM-DD HH:mm')
                 data.callOthers = data.callOthers?.map(i => i.userId)
-                // 如果有@其他人实时推送消息
-                if (data.callOthers) {
-                    socket.emit('remindTo', {
-                        toUserIds: data.callOthers,
-                    })
-                }
+
                 request({
                     url: 'eventAdd',
                     method: 'POST',
@@ -88,13 +73,20 @@ export default (props) => {
                             </DatePicker>
                         }
                     },
+                    // {
+                    //     type: 'custom',
+                    //     name: 'location',
+                    //     fieldProps: {
+                    //         rules: [{ required: true }]
+                    //     },
+                    //     element: props => <Map {...props} />
+                    // },
                     {
-                        type: 'custom',
+                        label: 'Location',
                         name: 'location',
                         fieldProps: {
                             rules: [{ required: true }]
-                        },
-                        element: props => <Map {...props} />
+                        }
                     },
 
                     {
@@ -111,12 +103,24 @@ export default (props) => {
                             const [visible, setVisible] = useState(false)
                             const [selected, setSelected] = useState([])
 
+
+                            useEffect(() => {
+                                onChange(selected)
+                            }, [selected])
+
+
                             return <div style={{ position: 'relative' }}>
                                 <InputItem
-                                    editable={false}
-                                    value={value?.map(i => i.username)}
+                                    value={value?.map(i => '@' + i.username)}
                                     placeholder='@ your friends...'
-                                    extra={<a onClick={e => { e.stopPropagation(); setVisible(!visible) }}>@</a>}
+                                    onFocus={() => setVisible(true)}
+                                    onBlur={() => setVisible(false)}
+                                    onKeyUp={e => {
+                                        if (e.key === 'Backspace' && selected.length > 0) {
+                                            selected.pop()
+                                            setSelected([...selected])
+                                        }
+                                    }}
                                 />
                                 <SelectUser
                                     visible={visible}
@@ -127,7 +131,6 @@ export default (props) => {
                                         } else {
                                             selected.push(item)
                                         }
-                                        onChange([...selected])
                                         setSelected([...selected])
                                     }}
                                 />
@@ -136,22 +139,22 @@ export default (props) => {
 
 
                     },
-                    {
-                        type: 'custom',
-                        name: 'images',
-                        element: props => {
-                            const { onChange, value } = props
-                            return <ImagePicker
-                                files={value}
-                                onChange={(files, operationType, index) => {
-                                    onChange(files)
-                                }}
-                                onImageClick={(index, fs) => console.log(index, fs)}
-                                selectable={true}
-                                multiple={true}
-                            />
-                        }
-                    },
+                    // {
+                    //     type: 'custom',
+                    //     name: 'images',
+                    //     element: props => {
+                    //         const { onChange, value } = props
+                    //         return <ImagePicker
+                    //             files={value}
+                    //             onChange={(files, operationType, index) => {
+                    //                 onChange(files)
+                    //             }}
+                    //             onImageClick={(index, fs) => console.log(index, fs)}
+                    //             selectable={true}
+                    //             multiple={true}
+                    //         />
+                    //     }
+                    // },
                 ]}
             />
             <Button type='primary' onClick={save}>Save</Button>
@@ -227,26 +230,25 @@ function SelectUser(props) {
 
     function selectUser(item) {
         onChange(item)
-        onClose()
     }
     return (
         <div style={{
-            display: visible ? true : 'none',
             position: 'absolute',
-            height: '10rem',
-            width: '60%',
+            height: visible ? '10rem' : '0',
+            transition: 'all 0.3s',
+            width: '100%',
             zIndex: '199',
             top: 0,
-            right: 0,
-            transform: 'translate(0,-100%)',
+            left: 0,
             overflow: 'scroll',
-            backgroundColor: '#fff'
+            backgroundColor: '#fff',
+            transform: 'translateY(-100%)',
+            boeder: visible ? '1px solid #ddd' : 'none'
         }}
-            onClick={e => e.stopPropagation()}
         >
             {/* <SearchBar placeholder='search...' onSubmit={fetchList} /> */}
-            <div>
-                <List >
+            <div >
+                <List renderHeader={'Select User'} >
                     {list.map(item => {
                         return <List.Item onClick={() => selectUser(item)} >{item.username}</List.Item>
                     })}
